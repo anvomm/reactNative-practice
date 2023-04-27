@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import {
   StyleSheet,
   ImageBackground,
@@ -7,52 +9,83 @@ import {
   Pressable,
   Image,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 
 export const RegistrationScreen = () => {
+  const [login, setLogin] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const onRegister = () => {
+    console.log("userdata: ", {
+      login,
+      email,
+      password,
+    });
+    setLogin("");
+    setEmail("");
+    setPassword("");
+  };
+
   return (
-    <View style={styles.container}>
-      <ImageBackground
-        source={require("../../assets/background.jpg")}
-        resizeMode="cover"
-        style={styles.image}
-      >
-        <View style={styles.whiteBox}>
-          <Image
-            style={styles.avatarImage}
-            source={
-              /* uri ? { uri } :  */ require("../../assets/emptyAvatar.jpg")
-            }
-          />
-          <TouchableOpacity /*style={styles.addButton}  onPress={onPress} */>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <ImageBackground
+          source={require("../../assets/background.jpg")}
+          resizeMode="cover"
+          style={styles.image}
+        >
+          <View style={styles.whiteBox}>
             <Image
-              style={styles.addButtonIcon}
-              source={require("../../assets/add.png")}
+              style={styles.avatarImage}
+              source={
+                /* uri ? { uri } :  */ require("../../assets/emptyAvatar.jpg")
+              }
             />
-          </TouchableOpacity>
-          <Text style={styles.titleText}>Регистрация</Text>
-          <TextInput
-            style={inputStyle}
-            placeholder="Логин"
-            placeholderTextColor="#BDBDBD"
-          />
-          <TextInput
-            style={inputStyle}
-            placeholder="Адрес электронной почты"
-            placeholderTextColor="#BDBDBD"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Пароль"
-            placeholderTextColor="#BDBDBD"
-          />
-          <Pressable style={styles.button}>
-            <Text style={styles.buttonText}>Зарегистрироваться </Text>
-          </Pressable>
-          <Text style={styles.linkText}>Уже есть аккаунт? Войти</Text>
-        </View>
-      </ImageBackground>
-    </View>
+            <TouchableOpacity /*style={styles.addButton}  onPress={onPress} */>
+              <Image
+                style={styles.addButtonIcon}
+                source={require("../../assets/add.png")}
+              />
+            </TouchableOpacity>
+            <Text style={styles.titleText}>Регистрация</Text>
+            <KeyboardAvoidingView // определяем ОС и настраиваем поведение клавиатуры
+              behavior={Platform.OS == "ios" ? "padding" : "height"}
+            >
+              <TextInput
+                value={login}
+                style={inputStyle}
+                placeholder="Логин"
+                placeholderTextColor="#BDBDBD"
+                onChangeText={(text) => setLogin(text)}
+                clearButtonMode="always"
+              />
+              <TextInput
+                value={email}
+                style={inputStyle}
+                placeholder="Адрес электронной почты"
+                placeholderTextColor="#BDBDBD"
+                onChangeText={(text) => setEmail(text)}
+              />
+              <TextInput
+                value={password}
+                style={styles.input}
+                placeholder="Пароль"
+                placeholderTextColor="#BDBDBD"
+                onChangeText={(text) => setPassword(text)}
+              />
+            </KeyboardAvoidingView>
+            <Pressable style={styles.button} onPress={onRegister}>
+              <Text style={styles.buttonText}>Зарегистрироваться </Text>
+            </Pressable>
+            <Text style={styles.linkText}>Уже есть аккаунт? Войти</Text>
+          </View>
+        </ImageBackground>
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -83,7 +116,7 @@ const styles = StyleSheet.create({
     lineHeight: 35,
   },
   button: {
-    backgroundColor: "#FF6C00",
+    backgroundColor: /* "#FF6C00" */ "tomato",
     width: 343,
     padding: 16,
     borderRadius: 100,
@@ -130,7 +163,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#1B4371",
     lineHeight: 19,
-  }
+  },
 });
 
 const inputStyle = StyleSheet.compose(styles.input, styles.margin);
