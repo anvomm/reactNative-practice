@@ -9,16 +9,16 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
   },
   whiteBox: {
-    backgroundColor: "#fff",
+    paddingTop: 92,
     height: 549,
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
+    alignItems: "center",
+    backgroundColor: "#fff",
     borderTopRightRadius: 25,
     borderTopLeftRadius: 25,
-    alignItems: "center",
-    paddingTop: 92,
   },
   titleText: {
     fontFamily: "Roboto-Bold",
@@ -28,25 +28,26 @@ export const styles = StyleSheet.create({
     lineHeight: 35,
   },
   button: {
-    backgroundColor: "#FF6C00",
     width: 343,
     padding: 16,
-    borderRadius: 100,
     marginTop: 43,
     marginBottom: 16,
+    backgroundColor: "#FF6C00",
+    borderRadius: 100,
   },
   buttonText: {
-    color: "#fff",
-    textAlign: "center",
+    fontFamily: "Roboto-Regular",
     fontSize: 16,
     lineHeight: 19,
+    textAlign: "center",
+    color: "#fff",
   },
   avatarImage: {
     width: 120,
     height: 120,
-    borderRadius: 16,
     position: "absolute",
     top: -60,
+    borderRadius: 16,
   },
   addButton: {
     position: "absolute",
@@ -55,21 +56,21 @@ export const styles = StyleSheet.create({
   },
   addButtonIcon: {
     width: 25,
-
     backgroundColor: "#fff",
     borderRadius: 50,
   },
   input: {
     width: 343,
     height: 50,
-    backgroundColor: "#F6F6F6",
-    borderStyle: "solid",
-    borderWidth: 1,
-    borderColor: "#E8E8E8",
-    borderRadius: 8,
     padding: 16,
+    fontFamily: "Roboto-Regular",
     fontSize: 16,
     lineHeight: 19,
+    backgroundColor: "#F6F6F6",
+    borderColor: "#E8E8E8",
+    borderStyle: "solid",
+    borderWidth: 1,
+    borderRadius: 8,
   },
   margin: {
     marginBottom: 16,
@@ -77,8 +78,8 @@ export const styles = StyleSheet.create({
   linkText: {
     fontFamily: "Roboto-Regular",
     fontSize: 16,
-    color: "#1B4371",
     lineHeight: 19,
+    color: "#1B4371",
   },
   visibilityButton: {
     position: "absolute",
@@ -87,6 +88,10 @@ export const styles = StyleSheet.create({
   },
   onFocusInput: {
     borderColor: "#FF6C00",
+  },
+  linkTextWrap: {
+    flexDirection: "row",
+    gap: 5,
   },
 });
 

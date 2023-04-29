@@ -15,7 +15,12 @@ import {
   Keyboard,
 } from "react-native";
 
-import { styles, inputStyle, onFocusInputStyle, onFocusPasswordInputStyle } from "./RegistrationScreenStyle";
+import {
+  styles,
+  inputStyle,
+  onFocusInputStyle,
+  onFocusPasswordInputStyle,
+} from "./RegistrationScreenStyle";
 
 export const RegistrationScreen = () => {
   const [login, setLogin] = useState("");
@@ -72,7 +77,9 @@ export const RegistrationScreen = () => {
             <Image
               style={styles.avatarImage}
               source={
-                image ? { uri: image } : require("../../assets/images/emptyAvatar.jpg")
+                image
+                  ? { uri: image }
+                  : require("../../assets/images/emptyAvatar.jpg")
               }
             />
             <TouchableOpacity
@@ -96,6 +103,9 @@ export const RegistrationScreen = () => {
               <TextInput
                 value={login}
                 style={focusLogin ? onFocusInputStyle : inputStyle}
+                selectionColor={"transparent"}
+                activeUnderlineColor="#F6F6F6"
+                keyboardType="visible-password"
                 onFocus={() => setFocusLogin(true)}
                 onBlur={() => setFocusLogin(false)}
                 underlineColorAndroid="#F6F6F6"
@@ -107,9 +117,11 @@ export const RegistrationScreen = () => {
               <TextInput
                 value={email}
                 style={focusEmail ? onFocusInputStyle : inputStyle}
+                cursorColor={"transparent"}
+                underlineColorAndroid={"#F6F6F6"}
+                keyboardType="visible-password"
                 onFocus={() => setFocusEmail(true)}
                 onBlur={() => setFocusEmail(false)}
-                underlineColorAndroid="#F6F6F6"
                 placeholder="Адрес электронной почты"
                 placeholderTextColor="#BDBDBD"
                 onChangeText={(text) => setEmail(text)}
@@ -117,6 +129,7 @@ export const RegistrationScreen = () => {
               <TextInput
                 secureTextEntry={hidePassword}
                 autoCompleteType="password"
+                cursorColor={"transparent"}
                 style={focusPassword ? onFocusPasswordInputStyle : styles.input}
                 onFocus={() => setFocusPassword(true)}
                 onBlur={() => setFocusPassword(false)}
@@ -137,11 +150,18 @@ export const RegistrationScreen = () => {
             <Pressable style={styles.button} onPress={onRegister}>
               <Text style={styles.buttonText}>Зарегистрироваться </Text>
             </Pressable>
-            <Text style={styles.linkText} /* позже здесь  будет ссылка */>Уже есть аккаунт? Войти</Text>  
+            <View style={styles.linkTextWrap}>
+              <Text style={styles.linkText}>Уже есть аккаунт?</Text>
+              <Text
+                style={styles.linkText}
+                onPress={() => console.log("переход на логин")}
+              >
+                Войти
+              </Text>
+            </View>
           </View>
         </ImageBackground>
       </View>
     </TouchableWithoutFeedback>
   );
 };
-
