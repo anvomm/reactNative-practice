@@ -1,5 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
 
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as Font from "expo-font";
@@ -7,6 +10,8 @@ import * as Font from "expo-font";
 import { StyleSheet, View } from "react-native";
 
 import { RegistrationScreen } from "./Screens/registrationScreen/RegistrationScreen";
+import { LoginScreen } from "./Screens/loginScreen/LoginScreen";
+import { Home } from "./Screens/Home/Home";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -31,6 +36,8 @@ export default function App() {
     prepare();
   }, []);
 
+  const MainStack = createStackNavigator();
+
   const onLayoutRootView = useCallback(async () => {
     if (isReady) {
       await SplashScreen.hideAsync();
@@ -41,10 +48,19 @@ export default function App() {
     return null;
   }
   return (
-    <View style={styles.container} onLayout={onLayoutRootView}>
-      <RegistrationScreen />
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <View style={styles.container} onLayout={onLayoutRootView}>
+        <MainStack.Navigator screenOptions={{headerShown: false}} initialRouteName="Login">
+          <MainStack.Screen
+            name="Registration"
+            component={RegistrationScreen}
+          />
+          <MainStack.Screen name="Login" component={LoginScreen} />
+          <MainStack.Screen name="Home" component={Home} />
+        </MainStack.Navigator>
+        <StatusBar style="auto" />
+      </View>
+    </NavigationContainer>
   );
 }
 

@@ -22,7 +22,7 @@ import {
   onFocusPasswordInputStyle,
 } from "./RegistrationScreenStyle";
 
-export const RegistrationScreen = () => {
+export const RegistrationScreen = ({ navigation }) => {
   const [login, setLogin] = useState("");
   const [focusLogin, setFocusLogin] = useState(false);
   const [email, setEmail] = useState("");
@@ -42,6 +42,7 @@ export const RegistrationScreen = () => {
     setLogin("");
     setEmail("");
     setPassword("");
+    navigation.navigate("Home");
   };
 
   const pickImage = async () => {
@@ -154,7 +155,7 @@ export const RegistrationScreen = () => {
               <Text style={styles.linkText}>Уже есть аккаунт?</Text>
               <Text
                 style={styles.linkText}
-                onPress={() => console.log("переход на логин")}
+                onPress={() => navigation.navigate("Login")}
               >
                 Войти
               </Text>

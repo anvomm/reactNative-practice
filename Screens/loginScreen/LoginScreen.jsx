@@ -20,7 +20,7 @@ import {
   onFocusPasswordInputStyle,
 } from "../registrationScreen/RegistrationScreenStyle";
 
-export const LoginScreen = () => {
+export const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [focusEmail, setFocusEmail] = useState(false);
   const [password, setPassword] = useState("");
@@ -93,7 +93,7 @@ export const LoginScreen = () => {
               <Text style={styles.linkText}>Нет аккаунта?</Text>
               <Text
                 style={styles.linkText}
-                onPress={() => console.log("переход на регистрацию")}
+                onPress={() => navigation.navigate("Registration")}
               >
                 Зарегистрироваться
               </Text>
