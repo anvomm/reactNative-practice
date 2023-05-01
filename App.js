@@ -26,6 +26,7 @@ export default function App() {
         await Font.loadAsync({
           "Roboto-Regular": require("./assets/fonts/Roboto/roboto-v30-latin_cyrillic-regular.ttf"),
           "Roboto-Bold": require("./assets/fonts/Roboto/roboto-v30-latin_cyrillic-500.ttf"),
+          "Roboto-700": require("./assets/fonts/Roboto/roboto-v30-latin_cyrillic-700.ttf"),
         });
       } catch (e) {
         console.warn(e);

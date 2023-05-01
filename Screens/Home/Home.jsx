@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { TouchableWithoutFeedback, Button } from "react-native";
@@ -16,10 +16,13 @@ import { CreatePostsScreen } from "../CreatePostsScreen/CreatePostsScreen";
 import { PostsScreen } from "../PostsScreen/PostsScreen";
 import { Pressable } from "react-native";
 
+import { confirmationAlert } from "../../components/feedback/ConfirmationAlert";
+
 const Tabs = createBottomTabNavigator();
 
-export const Home = ({ navigation }) => {
+export const Home = ({ navigation, route }) => {
   const [tabsOrder, setTabsOrder] = useState(1);
+  const { params: {login, email, image} } = route.params;
 
   return (
     <Tabs.Navigator
@@ -40,7 +43,7 @@ export const Home = ({ navigation }) => {
                 <TouchableWithoutFeedback
                   onPress={() => {
                     setTabsOrder(2);
-                    navigation.navigate("Profile");
+                    navigation.navigate("Profile", { login, email, image });
                   }}
                 >
                   {tabsOrder === 2 ? <UserWhite /> : <User />}
@@ -51,7 +54,7 @@ export const Home = ({ navigation }) => {
                 <TouchableWithoutFeedback
                   onPress={() => {
                     setTabsOrder(1);
-                    navigation.navigate("Posts");
+                    navigation.navigate("Posts", { login, email, image });
                   }}
                 >
                   <Grid />
@@ -87,7 +90,7 @@ export const Home = ({ navigation }) => {
               headerRight: () => (
                 <Pressable
                   style={{ paddingRight: 20 }}
-                  onPress={() => console.log("logging out")}
+                  onPress={confirmationAlert}
                 >
                   <LogOut />
                 </Pressable>
@@ -122,7 +125,7 @@ export const Home = ({ navigation }) => {
               headerLeft: () => (
                 <Pressable
                   style={{ paddingLeft: 20 }}
-                  onPress={() => navigation.navigate("Posts")}
+                  onPress={() => navigation.navigate("Posts", { login, email, immage })}
                 >
                   <Back />
                 </Pressable>
@@ -168,7 +171,7 @@ export const Home = ({ navigation }) => {
               headerLeft: () => (
                 <Pressable
                   style={{ paddingLeft: 20 }}
-                  onPress={() => navigation.navigate("Profile")}
+                  onPress={() => navigation.navigate("Profile", { login, email, immage })}
                 >
                   <Back />
                 </Pressable>

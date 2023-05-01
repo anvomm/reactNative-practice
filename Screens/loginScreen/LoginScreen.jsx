@@ -32,6 +32,12 @@ export const LoginScreen = ({ navigation }) => {
       email,
       password,
     });
+
+    navigation.navigate("Home", {
+      screen: "Posts",
+      params: { email },
+    });
+
     setEmail("");
     setPassword("");
   };
@@ -58,7 +64,8 @@ export const LoginScreen = ({ navigation }) => {
                 style={focusEmail ? onFocusInputStyle : inputStyle}
                 cursorColor={"transparent"}
                 underlineColorAndroid={"#F6F6F6"}
-                keyboardType="visible-password"
+                keyboardType="email-address"
+                autoCompleteType="email"
                 onFocus={() => setFocusEmail(true)}
                 onBlur={() => setFocusEmail(false)}
                 placeholder="Адрес электронной почты"

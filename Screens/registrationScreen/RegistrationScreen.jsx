@@ -39,7 +39,12 @@ export const RegistrationScreen = ({ navigation }) => {
       email,
       password,
     });
-    navigation.navigate("Home",{screen: "Posts", params: {login, email, image}} );
+
+    navigation.navigate("Home", {
+      screen: "Posts",
+      params: { login, email, image },
+    });
+    
     setLogin("");
     setEmail("");
     setPassword("");
@@ -106,7 +111,9 @@ export const RegistrationScreen = ({ navigation }) => {
                 style={focusLogin ? onFocusInputStyle : inputStyle}
                 selectionColor={"transparent"}
                 activeUnderlineColor="#F6F6F6"
-                keyboardType="visible-password"
+                keyboardType="email-address"
+                autoCompleteType={"username"}
+                autoCorrect={true}
                 onFocus={() => setFocusLogin(true)}
                 onBlur={() => setFocusLogin(false)}
                 underlineColorAndroid="#F6F6F6"
@@ -120,7 +127,9 @@ export const RegistrationScreen = ({ navigation }) => {
                 style={focusEmail ? onFocusInputStyle : inputStyle}
                 cursorColor={"transparent"}
                 underlineColorAndroid={"#F6F6F6"}
-                keyboardType="visible-password"
+                keyboardType="email-address"
+                autoCompleteType="email"
+                autoCorrect={true}
                 onFocus={() => setFocusEmail(true)}
                 onBlur={() => setFocusEmail(false)}
                 placeholder="Адрес электронной почты"
