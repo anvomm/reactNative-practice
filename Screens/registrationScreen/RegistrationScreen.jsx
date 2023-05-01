@@ -39,10 +39,10 @@ export const RegistrationScreen = ({ navigation }) => {
       email,
       password,
     });
+    navigation.navigate("Home",{screen: "Posts", params: {login, email, image}} );
     setLogin("");
     setEmail("");
     setPassword("");
-    navigation.navigate("Home");
   };
 
   const pickImage = async () => {

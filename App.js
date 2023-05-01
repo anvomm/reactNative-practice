@@ -18,6 +18,8 @@ SplashScreen.preventAutoHideAsync();
 export default function App() {
   const [isReady, setIsReady] = useState(false);
 
+  
+
   useEffect(() => {
     async function prepare() {
       try {
