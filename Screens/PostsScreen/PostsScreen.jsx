@@ -1,17 +1,23 @@
 import { useState, useEffect } from "react";
 
-import { Image, StyleSheet, View, Text } from "react-native";
+import { Image, StyleSheet, View, Text, FlatList } from "react-native";
+
+import Message from "../../assets/images/svg/message.svg";
+import Location from "../../assets/images/svg/location.svg";
 
 export const PostsScreen = ({ navigation, route }) => {
   const { login, email, image, picture } = route.params;
+  console.log(route.params);
 
   const [userEmail] = useState(email);
   const [username] = useState(login);
   const [avatar] = useState(image);
-  const [pictures, setPictures] = useState([]);
+  let [pictures, setPictures] = useState([]);
 
   useEffect(() => {
-    setPictures([...pictures, picture]);
+    if ("picture" in route.params) {
+      setPictures([...pictures, { ...picture, id: pictures.length }]);
+    }
   }, [picture]);
 
   return (
@@ -30,6 +36,31 @@ export const PostsScreen = ({ navigation, route }) => {
           <Text style={styles.emailText}>{userEmail}</Text>
         </View>
       </View>
+      {pictures.length > 0 && (
+        <FlatList
+          data={pictures}
+          ListEmptyComponent={<View></View>}
+          renderItem={({ item }) => (
+            <View style={styles.postWrap}>
+              <Image style={styles.postImage} source={{ uri: item?.image }} />
+              <Text style={styles.postTitle}>{item?.imageTitle}</Text>
+              <View style={styles.postBottomWrap}>
+                <View style={styles.postBottomSmallWrap}>
+                  <Message />
+                  <Text style={styles.postCommentsCount}>
+                    {item?.comments?.length ?? 0}
+                  </Text>
+                </View>
+                <View style={styles.postBottomSmallWrap}>
+                  <Location />
+                  <Text style={styles.postLocation}>{item?.location}</Text>
+                </View>
+              </View>
+            </View>
+          )}
+          keyExtractor={(item) => item?.id}
+        />
+      )}
     </View>
   );
 };
@@ -62,5 +93,43 @@ const styles = StyleSheet.create({
   },
   emailText: {
     color: "rgba(33, 33, 33, 0.8)",
+  },
+  postImage: {
+    width: "100%",
+    height: 240,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  postTitle: {
+    marginBottom: 11,
+    fontFamily: "Roboto-Bold",
+    fontSize: 16,
+    lineHeight: 18.75,
+    color: "#212121",
+  },
+  postCommentsCount: {
+    fontFamily: "Roboto-Regular",
+    fontSize: 16,
+    lineHeight: 18.75,
+    color: "#BDBDBD",
+  },
+  postLocation: {
+    fontFamily: "Roboto-Regular",
+    fontSize: 16,
+    lineHeight: 18.75,
+    color: "#212121",
+    textDecorationLine: "underline",
+  },
+  postBottomWrap: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  postBottomSmallWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  postWrap: {
+    marginBottom: 34,
   },
 });
