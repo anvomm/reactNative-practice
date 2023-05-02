@@ -22,7 +22,9 @@ const Tabs = createBottomTabNavigator();
 
 export const Home = ({ navigation, route }) => {
   const [tabsOrder, setTabsOrder] = useState(1);
-  const { params: {login, email, image} } = route.params;
+  const {
+    params: { login, email, image },
+  } = route.params;
 
   return (
     <Tabs.Navigator
@@ -125,7 +127,9 @@ export const Home = ({ navigation, route }) => {
               headerLeft: () => (
                 <Pressable
                   style={{ paddingLeft: 20 }}
-                  onPress={() => navigation.navigate("Posts", { login, email, immage })}
+                  onPress={() =>
+                    navigation.navigate("Posts", { login, email, image })
+                  }
                 >
                   <Back />
                 </Pressable>
@@ -171,7 +175,9 @@ export const Home = ({ navigation, route }) => {
               headerLeft: () => (
                 <Pressable
                   style={{ paddingLeft: 20 }}
-                  onPress={() => navigation.navigate("Profile", { login, email, immage })}
+                  onPress={() =>
+                    navigation.navigate("Profile", { login, email, image })
+                  }
                 >
                   <Back />
                 </Pressable>

@@ -1,18 +1,33 @@
+import { useState, useEffect } from "react";
+
 import { Image, StyleSheet, View, Text } from "react-native";
 
 export const PostsScreen = ({ navigation, route }) => {
-  const { login, email, image } = route.params;
+  const { login, email, image, picture } = route.params;
+
+  const [userEmail] = useState(email);
+  const [username] = useState(login);
+  const [avatar] = useState(image);
+  const [pictures, setPictures] = useState([]);
+
+  useEffect(() => {
+    setPictures([...pictures, picture]);
+  }, [picture]);
 
   return (
     <View style={styles.container}>
       <View style={styles.contactsWrap}>
-        <Image style={styles.image} source={
-                image
-                  ? { uri: image }
-                  : require("../../assets/images/emptyAvatar.jpg")} />
+        <Image
+          style={styles.image}
+          source={
+            avatar
+              ? { uri: avatar }
+              : require("../../assets/images/emptyAvatar.jpg")
+          }
+        />
         <View>
-          <Text style={styles.loginText}>{login ?? "User login"}</Text>
-          <Text style={styles.emailText}>{email}</Text>
+          <Text style={styles.loginText}>{username ?? "User login"}</Text>
+          <Text style={styles.emailText}>{userEmail}</Text>
         </View>
       </View>
     </View>
@@ -47,5 +62,5 @@ const styles = StyleSheet.create({
   },
   emailText: {
     color: "rgba(33, 33, 33, 0.8)",
-  }
+  },
 });
