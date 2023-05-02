@@ -7,12 +7,11 @@ import Location from "../../assets/images/svg/location.svg";
 
 export const PostsScreen = ({ navigation, route }) => {
   const { login, email, image, picture } = route.params;
-  console.log(route.params);
 
   const [userEmail] = useState(email);
   const [username] = useState(login);
   const [avatar] = useState(image);
-  let [pictures, setPictures] = useState([]);
+  const [pictures, setPictures] = useState([]);
 
   useEffect(() => {
     if ("picture" in route.params) {

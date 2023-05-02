@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import * as ImagePicker from "expo-image-picker";
+import { useNavigation } from "@react-navigation/native";
 
 import {
   StyleSheet,
@@ -21,10 +22,12 @@ import Trash from "../../assets/images/svg/trash.svg";
 import Camera from "../../assets/images/svg/camera.svg";
 import CameraWhite from "../../assets/images/svg/cameraWhite.svg";
 
-export const CreatePostsScreen = ({ navigation }) => {
+export const CreatePostsScreen = ({ addPicture }) => {
   const [image, setImage] = useState(null);
   const [imageTitle, setImageTitle] = useState("");
   const [location, setLocation] = useState("");
+
+  const navigation = useNavigation();
 
   const pickImage = async () => {
     if (image) {
@@ -49,6 +52,7 @@ export const CreatePostsScreen = ({ navigation }) => {
     if (!allTheDataInserted) {
       return Alert.alert("Please fill in all the fields!");
     }
+    addPicture({ image, imageTitle, location });
     navigation.navigate("Posts", { picture: { image, imageTitle, location } });
     onDelete();
   };

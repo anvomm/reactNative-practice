@@ -23,8 +23,19 @@ const Tabs = createBottomTabNavigator();
 export const Home = ({ navigation, route }) => {
   const [tabsOrder, setTabsOrder] = useState(1);
   const {
-    params: { login, email, image },
+    params: { login, email, image, picture },
   } = route.params;
+  /* console.log(route.params) */
+
+  const [userEmail] = useState(email);
+  const [username] = useState(login);
+  const [avatar] = useState(image);
+  const [pictures, setPictures] = useState([]);
+
+  const addPicture = (picture) => {
+    pictures.push(picture)
+  }
+ /*  console.log(pictures); */
 
   return (
     <Tabs.Navigator
@@ -45,7 +56,7 @@ export const Home = ({ navigation, route }) => {
                 <TouchableWithoutFeedback
                   onPress={() => {
                     setTabsOrder(2);
-                    navigation.navigate("Profile", { login, email, image });
+                    navigation.navigate("Profile", { login: username, email: userEmail, image: avatar });
                   }}
                 >
                   {tabsOrder === 2 ? <UserWhite /> : <User />}
@@ -56,7 +67,7 @@ export const Home = ({ navigation, route }) => {
                 <TouchableWithoutFeedback
                   onPress={() => {
                     setTabsOrder(1);
-                    navigation.navigate("Posts", { login, email, image });
+                    navigation.navigate("Posts", { login: username, email: userEmail, image: avatar });
                   }}
                 >
                   <Grid />
@@ -101,7 +112,7 @@ export const Home = ({ navigation, route }) => {
           />
           <Tabs.Screen
             name="CreatePost"
-            component={CreatePostsScreen}
+            children={() => <CreatePostsScreen addPicture={addPicture}/>}
             options={{
               tabBarStyle: { display: "none" },
               tabBarItemStyle: {
@@ -128,7 +139,7 @@ export const Home = ({ navigation, route }) => {
                 <Pressable
                   style={{ paddingLeft: 20 }}
                   onPress={() =>
-                    navigation.navigate("Posts", { login, email, image })
+                    navigation.navigate("Posts", { login: username, email: userEmail, image: avatar })
                   }
                 >
                   <Back />
@@ -136,7 +147,7 @@ export const Home = ({ navigation, route }) => {
               ),
             }}
           />
-          <Tabs.Screen name="Profile" component={ProfileScreen} />
+          <Tabs.Screen name="Profile" children={(props) => <ProfileScreen pictures={pictures} {...props} />} options={{headerShown: false}} />
         </>
       )}
       {tabsOrder === 2 && (
@@ -144,7 +155,7 @@ export const Home = ({ navigation, route }) => {
           <Tabs.Screen name="Posts" component={PostsScreen} />
           <Tabs.Screen
             name="Profile"
-            component={ProfileScreen}
+            children={(props) => <ProfileScreen pictures={pictures} {...props} />}
             options={{
               tabBarItemStyle: {
                 backgroundColor: "#FF6C00",
@@ -152,11 +163,12 @@ export const Home = ({ navigation, route }) => {
                 alignSelf: "center",
                 borderRadius: 20,
               },
+              headerShown: false
             }}
           />
           <Tabs.Screen
             name="CreatePost"
-            component={CreatePostsScreen}
+            children={() => <CreatePostsScreen addPicture={addPicture}/>}
             options={{
               tabBarStyle: { display: "none" },
               title: "Создать публикацию",
@@ -176,7 +188,7 @@ export const Home = ({ navigation, route }) => {
                 <Pressable
                   style={{ paddingLeft: 20 }}
                   onPress={() =>
-                    navigation.navigate("Profile", { login, email, image })
+                    navigation.navigate("Profile", { login: username, email: userEmail, image: avatar })
                   }
                 >
                   <Back />
