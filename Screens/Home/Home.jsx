@@ -33,7 +33,7 @@ export const Home = ({ navigation, route }) => {
   const [pictures, setPictures] = useState([]);
 
   const addPicture = (picture) => {
-    pictures.push(picture)
+    pictures.unshift(picture)
   }
  /*  console.log(pictures); */
 
@@ -152,7 +152,29 @@ export const Home = ({ navigation, route }) => {
       )}
       {tabsOrder === 2 && (
         <>
-          <Tabs.Screen name="Posts" component={PostsScreen} />
+          <Tabs.Screen name="Posts" component={PostsScreen} options={{
+              title: "Публикации",
+              headerStyle: {
+                borderBottomColor: "#E5E5E5",
+                borderBottomWidth: 1,
+                height: 88,
+              },
+              headerTintColor: "#212121",
+              headerTitleAlign: "center",
+              headerTitleStyle: {
+                fontWeight: 500,
+                fontFamily: "Roboto-Bold",
+                fontSize: 17,
+              },
+              headerRight: () => (
+                <Pressable
+                  style={{ paddingRight: 20 }}
+                  onPress={confirmationAlert}
+                >
+                  <LogOut />
+                </Pressable>
+              ),
+            }} />
           <Tabs.Screen
             name="Profile"
             children={(props) => <ProfileScreen pictures={pictures} {...props} />}

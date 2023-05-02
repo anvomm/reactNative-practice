@@ -3,7 +3,9 @@ import { useState, useEffect } from "react";
 import { Image, StyleSheet, View, Text, FlatList } from "react-native";
 
 import Message from "../../assets/images/svg/message.svg";
+import MessageOrange from "../../assets/images/svg/messageOrange.svg";
 import Location from "../../assets/images/svg/location.svg";
+import ThumbsUp from "../../assets/images/svg/thumbsUp.svg";
 
 export const PostsScreen = ({ navigation, route }) => {
   const { login, email, image, picture } = route.params;
@@ -15,7 +17,7 @@ export const PostsScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     if ("picture" in route.params) {
-      setPictures([...pictures, { ...picture, id: pictures.length }]);
+      setPictures([{ ...picture, id: pictures.length }, ...pictures]);
     }
   }, [picture]);
 
@@ -44,11 +46,31 @@ export const PostsScreen = ({ navigation, route }) => {
               <Image style={styles.postImage} source={{ uri: item?.image }} />
               <Text style={styles.postTitle}>{item?.imageTitle}</Text>
               <View style={styles.postBottomWrap}>
-                <View style={styles.postBottomSmallWrap}>
-                  <Message />
-                  <Text style={styles.postCommentsCount}>
-                    {item?.comments?.length ?? 0}
-                  </Text>
+                <View style={styles.postBottomLikeslWrap}>
+                  <View style={styles.postBottomSmallWrap}>
+                    {item?.comments?.length > 0 ? (
+                      <MessageOrange />
+                    ) : (
+                      <Message />
+                    )}
+                    <Text
+                      style={
+                        item?.comments?.length > 0
+                          ? postCommentsCountActive
+                          : postCommentsCountInactive
+                      }
+                    >
+                      {item?.comments?.length ?? 0}
+                    </Text>
+                  </View>
+                  {item?.likesCount > 0 && (
+                    <View style={styles.postBottomSmallWrap}>
+                      <ThumbsUp />
+                      <Text style={postCommentsCountActive}>
+                        item?.likesCount
+                      </Text>
+                    </View>
+                  )}
                 </View>
                 <View style={styles.postBottomSmallWrap}>
                   <Location />
@@ -110,7 +132,12 @@ const styles = StyleSheet.create({
     fontFamily: "Roboto-Regular",
     fontSize: 16,
     lineHeight: 18.75,
+  },
+  grey: {
     color: "#BDBDBD",
+  },
+  black: {
+    color: "#212121",
   },
   postLocation: {
     fontFamily: "Roboto-Regular",
@@ -131,4 +158,20 @@ const styles = StyleSheet.create({
   postWrap: {
     marginBottom: 34,
   },
+  postBottomLikeslWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 27,
+  },
 });
+
+export const postCommentsCountInactive = StyleSheet.compose(
+  styles.postCommentsCount,
+  styles.grey
+);
+export const postCommentsCountActive = StyleSheet.compose(
+  styles.postCommentsCount,
+  styles.black
+);
+
+export default styles;

@@ -1,23 +1,38 @@
-import { useState } from "react";
-
-import * as ImagePicker from "expo-image-picker";
-
-import { StyleSheet, View, ImageBackground, Image, TouchableOpacity, Text, Pressable } from "react-native";
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  ImageBackground,
+  Image,
+  TouchableOpacity,
+  Text,
+  Pressable,
+  ScrollView,
+} from "react-native";
 
 import LogOut from "../../assets/images/svg/logOut.svg";
+import Message from "../../assets/images/svg/message.svg";
+import MessageOrange from "../../assets/images/svg/messageOrange.svg";
+import Location from "../../assets/images/svg/location.svg";
+import ThumbsUp from "../../assets/images/svg/thumbsUp.svg";
 
 import { confirmationAlert } from "../../components/feedback/ConfirmationAlert";
 
+import postsStyles from "../PostsScreen/PostsScreen";
+import {
+  postCommentsCountActive,
+  postCommentsCountInactive,
+} from "../PostsScreen/PostsScreen";
+
 export const ProfileScreen = (props) => {
   const { login, image } = props.route.params;
-  
+
   const [username] = useState(login ?? "Username");
-  const [newIimage, setNewImage] = useState(image ?? null);
+  const [newImage, setNewImage] = useState(image ?? null);
   const [pictures] = useState(props.pictures ?? []);
-  console.log(pictures);
 
   const pickImage = async () => {
-    if (newIimage) {
+    if (newImage) {
       return setImage(null);
     }
 
@@ -33,64 +48,109 @@ export const ProfileScreen = (props) => {
     }
   };
 
-  return <View style={styles.container}>
-    <ImageBackground
-          source={require("../../assets/images/background.jpg")}
-          resizeMode="cover"
-          style={styles.image}
-        >
-            <View style={styles.whiteBox}>
-            <Pressable
-                  style={styles.logOutButton}
-                  onPress={confirmationAlert}
-                >
-                  <LogOut />
-                </Pressable>
+  return (
+    <ScrollView style={styles.container}>
+      <ImageBackground
+        source={require("../../assets/images/background.jpg")}
+        style={styles.image}
+      >
+        <View style={styles.whiteBox}>
+          <Pressable style={styles.logOutButton} onPress={confirmationAlert}>
+            <LogOut />
+          </Pressable>
+          <Image
+            style={styles.avatarImage}
+            source={
+              newImage
+                ? { uri: newImage }
+                : require("../../assets/images/emptyAvatar.jpg")
+            }
+          />
+          <TouchableOpacity
+            activeOpacity={0.5}
+            style={styles.addButton}
+            onPress={pickImage}
+          >
             <Image
-              style={styles.avatarImage}
+              style={styles.addButtonIcon}
               source={
-                image
-                  ? { uri: newIimage }
-                  : require("../../assets/images/emptyAvatar.jpg")
+                newImage
+                  ? require("../../assets/images/delete.png")
+                  : require("../../assets/images/add.png")
               }
             />
-            <TouchableOpacity
-              activeOpacity={0.5}
-              style={styles.addButton}
-              onPress={pickImage}
-            >
-              <Image
-                style={styles.addButtonIcon}
-                source={
-                  image
-                    ? require("../../assets/images/delete.png")
-                    : require("../../assets/images/add.png")
-                }
-              />
-            </TouchableOpacity>
-            <Text style={styles.nameText}>{username}</Text>
-            </View>
-        </ImageBackground>
-  </View>;
+          </TouchableOpacity>
+          <Text style={styles.nameText}>{username}</Text>
+          <View style={styles.list}>
+            {pictures.length > 0 ? (
+              pictures.map((item) => (
+                <View key={item?.id} style={postsStyles.postWrap}>
+                  <Image
+                    style={postsStyles.postImage}
+                    source={{ uri: item?.image }}
+                  />
+                  <Text style={postsStyles.postTitle}>{item?.imageTitle}</Text>
+                  <View style={postsStyles.postBottomWrap}>
+                    <View style={postsStyles.postBottomLikeslWrap}>
+                      <View style={postsStyles.postBottomSmallWrap}>
+                        {item?.comments?.length > 0 ? (
+                          <MessageOrange />
+                        ) : (
+                          <Message />
+                        )}
+                        <Text
+                          style={
+                            item?.comments?.length > 0
+                              ? postCommentsCountActive
+                              : postCommentsCountInactive
+                          }
+                        >
+                          {item?.comments?.length ?? 0}
+                        </Text>
+                      </View>
+                      {item?.likesCount > 0 && (
+                        <View style={postsStyles.postBottomSmallWrap}>
+                          <ThumbsUp />
+                          <Text style={postCommentsCountActive}>
+                            item?.likesCount
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                    <View style={postsStyles.postBottomSmallWrap}>
+                      <Location />
+                      <Text style={postsStyles.postLocation}>
+                        {item?.location}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              ))
+            ) : (
+              <Text style={postsStyles.loginText}>
+                Пока тут пусто, самое время добавить своё первое фото!
+              </Text>
+            )}
+          </View>
+        </View>
+      </ImageBackground>
+    </ScrollView>
+  );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   image: {
     flex: 1,
-    justifyContent: "center",
+    paddingTop: 147,
   },
   whiteBox: {
     paddingTop: 24,
     paddingHorizontal: 16,
     minHeight: 549,
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
+    width: "100%",
     alignItems: "center",
     backgroundColor: "#fff",
     borderTopRightRadius: 25,
@@ -123,5 +183,8 @@ const styles = StyleSheet.create({
   logOutButton: {
     alignSelf: "flex-end",
     marginBottom: 48,
-  }
+  },
+  list: {
+    width: "100%",
+  },
 });
