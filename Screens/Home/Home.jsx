@@ -112,7 +112,7 @@ export const Home = ({ navigation, route }) => {
           />
           <Tabs.Screen
             name="CreatePost"
-            children={() => <CreatePostsScreen addPicture={addPicture}/>}
+            children={() => <CreatePostsScreen addPicture={addPicture} adjustTabsOrder={setTabsOrder}/>}
             options={{
               tabBarStyle: { display: "none" },
               tabBarItemStyle: {
@@ -190,7 +190,7 @@ export const Home = ({ navigation, route }) => {
           />
           <Tabs.Screen
             name="CreatePost"
-            children={() => <CreatePostsScreen addPicture={addPicture}/>}
+            children={() => <CreatePostsScreen addPicture={addPicture} adjustTabsOrder={setTabsOrder}/>}
             options={{
               tabBarStyle: { display: "none" },
               title: "Создать публикацию",

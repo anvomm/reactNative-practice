@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -9,6 +9,8 @@ import {
   Pressable,
   ScrollView,
 } from "react-native";
+
+import { useNavigation } from "@react-navigation/native";
 
 import LogOut from "../../assets/images/svg/logOut.svg";
 import Message from "../../assets/images/svg/message.svg";
@@ -31,6 +33,21 @@ export const ProfileScreen = (props) => {
   const [newImage, setNewImage] = useState(image ?? null);
   const [pictures] = useState(props.pictures ?? []);
 
+  const ref = useRef(null);
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    navigation.addListener("focus", () => {
+        scrollTop();
+      });
+  }, [])
+
+  const scrollTop = () => {
+    if (ref.current) {
+        ref.current.scrollTo({ x: 0, y: 0, animated: true })
+    }
+  }
+ 
   const pickImage = async () => {
     if (newImage) {
       return setImage(null);
@@ -49,7 +66,7 @@ export const ProfileScreen = (props) => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView ref={ref} scrollsToTop={true} style={styles.container}>
       <ImageBackground
         source={require("../../assets/images/background.jpg")}
         style={styles.image}

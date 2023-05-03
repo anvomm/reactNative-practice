@@ -22,7 +22,7 @@ import Trash from "../../assets/images/svg/trash.svg";
 import Camera from "../../assets/images/svg/camera.svg";
 import CameraWhite from "../../assets/images/svg/cameraWhite.svg";
 
-export const CreatePostsScreen = ({ addPicture }) => {
+export const CreatePostsScreen = ({ addPicture, adjustTabsOrder }) => {
   const [image, setImage] = useState(null);
   const [imageTitle, setImageTitle] = useState("");
   const [location, setLocation] = useState("");
@@ -53,6 +53,7 @@ export const CreatePostsScreen = ({ addPicture }) => {
       return Alert.alert("Please fill in all the fields!");
     }
     addPicture({ image, imageTitle, location });
+    adjustTabsOrder(1);
     navigation.navigate("Posts", { picture: { image, imageTitle, location } });
     onDelete();
   };

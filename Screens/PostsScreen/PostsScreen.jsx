@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { Image, StyleSheet, View, Text, FlatList } from "react-native";
 
@@ -15,12 +15,22 @@ export const PostsScreen = ({ navigation, route }) => {
   const [avatar] = useState(image);
   const [pictures, setPictures] = useState([]);
 
+  const flatListRef = useRef(null);
+
   useEffect(() => {
+    navigation.addListener("focus", () => {
+        scrollToTop();
+      });
+
     if ("picture" in route.params) {
       setPictures([{ ...picture, id: pictures.length }, ...pictures]);
     }
   }, [picture]);
 
+  const scrollToTop = () => {
+    flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
+  };
+  
   return (
     <View style={styles.container}>
       <View style={styles.contactsWrap}>
@@ -37,10 +47,15 @@ export const PostsScreen = ({ navigation, route }) => {
           <Text style={styles.emailText}>{userEmail}</Text>
         </View>
       </View>
-      {pictures.length > 0 && (
         <FlatList
+        ref={flatListRef}
+        style={{ flex: 1 }}
           data={pictures}
-          ListEmptyComponent={<View></View>}
+          ListHeaderComponent={() => <View style={{ height: 0 }} />}
+
+          ListEmptyComponent={<Text style={styles.loginText}>
+          Пока тут пусто, самое время добавить своё первое фото!
+        </Text>}
           renderItem={({ item }) => (
             <View style={styles.postWrap}>
               <Image style={styles.postImage} source={{ uri: item?.image }} />
@@ -81,7 +96,6 @@ export const PostsScreen = ({ navigation, route }) => {
           )}
           keyExtractor={(item) => item?.id}
         />
-      )}
     </View>
   );
 };
@@ -92,7 +106,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     paddingHorizontal: 16,
-    paddingVertical: 32,
+    paddingTop: 32,
   },
   image: {
     width: 60,
