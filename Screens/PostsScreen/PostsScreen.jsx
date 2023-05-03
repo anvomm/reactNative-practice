@@ -1,6 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 
-import { Image, StyleSheet, View, Text, FlatList } from "react-native";
+import {
+  Image,
+  StyleSheet,
+  View,
+  Text,
+  FlatList,
+  Pressable,
+} from "react-native";
 
 import Message from "../../assets/images/svg/message.svg";
 import MessageOrange from "../../assets/images/svg/messageOrange.svg";
@@ -9,6 +16,8 @@ import ThumbsUp from "../../assets/images/svg/thumbsUp.svg";
 
 export const PostsScreen = ({ navigation, route }) => {
   const { login, email, image, picture } = route.params;
+
+  console.log(route.params)
 
   const [userEmail] = useState(email);
   const [username] = useState(login);
@@ -19,8 +28,8 @@ export const PostsScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     navigation.addListener("focus", () => {
-        scrollToTop();
-      });
+      scrollToTop();
+    });
 
     if ("picture" in route.params) {
       setPictures([{ ...picture, id: pictures.length }, ...pictures]);
@@ -30,7 +39,7 @@ export const PostsScreen = ({ navigation, route }) => {
   const scrollToTop = () => {
     flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
   };
-  
+
   return (
     <View style={styles.container}>
       <View style={styles.contactsWrap}>
@@ -47,55 +56,62 @@ export const PostsScreen = ({ navigation, route }) => {
           <Text style={styles.emailText}>{userEmail}</Text>
         </View>
       </View>
-        <FlatList
+      <FlatList
         ref={flatListRef}
         style={{ flex: 1 }}
-          data={pictures}
-          ListHeaderComponent={() => <View style={{ height: 0 }} />}
-
-          ListEmptyComponent={<Text style={styles.loginText}>
-          Пока тут пусто, самое время добавить своё первое фото!
-        </Text>}
-          renderItem={({ item }) => (
-            <View style={styles.postWrap}>
-              <Image style={styles.postImage} source={{ uri: item?.image }} />
-              <Text style={styles.postTitle}>{item?.imageTitle}</Text>
-              <View style={styles.postBottomWrap}>
-                <View style={styles.postBottomLikeslWrap}>
-                  <View style={styles.postBottomSmallWrap}>
+        data={pictures}
+        ListHeaderComponent={() => <View style={{ height: 0 }} />}
+        ListEmptyComponent={
+          <Text style={styles.loginText}>
+            Пока тут пусто, самое время добавить своё первое фото!
+          </Text>
+        }
+        renderItem={({ item }) => (
+          <View style={styles.postWrap}>
+            <Image style={styles.postImage} source={{ uri: item?.image }} />
+            <Text style={styles.postTitle}>{item?.imageTitle}</Text>
+            <View style={styles.postBottomWrap}>
+              <View style={styles.postBottomLikeslWrap}>
+                <View style={styles.postBottomSmallWrap}>
+                  <Pressable onPress={() => navigation.navigate("Comments", {picture: item.image})}>
                     {item?.comments?.length > 0 ? (
                       <MessageOrange />
                     ) : (
                       <Message />
                     )}
-                    <Text
-                      style={
-                        item?.comments?.length > 0
-                          ? postCommentsCountActive
-                          : postCommentsCountInactive
-                      }
-                    >
-                      {item?.comments?.length ?? 0}
+                  </Pressable>
+                  <Text
+                    style={
+                      item?.comments?.length > 0
+                        ? postCommentsCountActive
+                        : postCommentsCountInactive
+                    }
+                  >
+                    {item?.comments?.length ?? 0}
+                  </Text>
+                </View>
+                {item?.likesCount > 0 && (
+                  <View style={styles.postBottomSmallWrap}>
+                    <ThumbsUp />
+                    <Text style={postCommentsCountActive}>
+                      item?.likesCount
                     </Text>
                   </View>
-                  {item?.likesCount > 0 && (
-                    <View style={styles.postBottomSmallWrap}>
-                      <ThumbsUp />
-                      <Text style={postCommentsCountActive}>
-                        item?.likesCount
-                      </Text>
-                    </View>
-                  )}
-                </View>
-                <View style={styles.postBottomSmallWrap}>
-                  <Location />
-                  <Text style={styles.postLocation}>{item?.location}</Text>
-                </View>
+                )}
               </View>
+
+              <Pressable
+                style={styles.postBottomSmallWrap}
+                onPress={() => navigation.navigate("Map")}
+              >
+                <Location />
+                <Text style={styles.postLocation}>{item?.location}</Text>
+              </Pressable>
             </View>
-          )}
-          keyExtractor={(item) => item?.id}
-        />
+          </View>
+        )}
+        keyExtractor={(item) => item?.id}
+      />
     </View>
   );
 };
