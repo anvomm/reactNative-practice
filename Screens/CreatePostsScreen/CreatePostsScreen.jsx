@@ -50,11 +50,11 @@ export const CreatePostsScreen = ({ addPicture, adjustTabsOrder }) => {
 
   const onSave = () => {
     if (!allTheDataInserted) {
-      return Alert.alert("Please fill in all the fields!");
+      return Alert.alert("Необходимо заполнить все поля!");
     }
-    addPicture({ image, imageTitle, location });
+    addPicture({ image, imageTitle, location, commentsCount: 0 });
     adjustTabsOrder(1);
-    navigation.navigate("Posts", { picture: { image, imageTitle, location } });
+    navigation.navigate("Posts", { picture: { image, imageTitle, location, commentsCount: 0, comments: [] } });
     onDelete();
   };
 

@@ -13,6 +13,7 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from "react-native";
 
 import {
@@ -34,6 +35,10 @@ export const RegistrationScreen = ({ navigation }) => {
   const [image, setImage] = useState(null);
 
   const onRegister = () => {
+    if (!login || !email || !password) {
+      return Alert.alert("Необходимо заполнить все поля!");
+    }
+
     console.log("userdata: ", {
       login,
       email,
@@ -44,7 +49,7 @@ export const RegistrationScreen = ({ navigation }) => {
       screen: "Posts",
       params: { login, email, image },
     });
-    
+
     setLogin("");
     setEmail("");
     setPassword("");

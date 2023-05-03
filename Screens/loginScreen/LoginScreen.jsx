@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert
 } from "react-native";
 
 import { loginStyles } from "./LoginScreenStyle";
@@ -28,6 +29,10 @@ export const LoginScreen = ({ navigation }) => {
   const [focusPassword, setFocusPassword] = useState(false);
 
   const onLogin = () => {
+    if (!email || !password) {
+      return Alert.alert("Необходимо заполнить все поля!");
+    }
+
     console.log("userdata: ", {
       email,
       password,

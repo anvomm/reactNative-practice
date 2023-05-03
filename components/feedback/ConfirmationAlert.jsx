@@ -1,11 +1,11 @@
 import { Alert } from "react-native";
 
 export const confirmationAlert = () =>
-    Alert.alert('Are you shure you want to log out?', '', [
+    Alert.alert('Вы уверены, что хотите выйти?', '', [
       {
-        text: 'Cancel',
+        text: 'Отменить',
         onPress: () => console.log('Cancel Pressed'),
         style: 'cancel',
       },
-      {text: 'log out', onPress: () => console.log('log out')},
+      {text: 'Выйти', onPress: () => console.log('log out')},
     ]);

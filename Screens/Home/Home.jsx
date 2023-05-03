@@ -25,17 +25,15 @@ export const Home = ({ navigation, route }) => {
   const {
     params: { login, email, image, picture },
   } = route.params;
-  /* console.log(route.params) */
 
   const [userEmail] = useState(email);
   const [username] = useState(login);
-  const [avatar] = useState(image);
+  const [avatar, setAvatar] = useState(image);
   const [pictures, setPictures] = useState([]);
 
   const addPicture = (picture) => {
     pictures.unshift(picture)
   }
- /*  console.log(pictures); */
 
   return (
     <Tabs.Navigator
@@ -85,7 +83,7 @@ export const Home = ({ navigation, route }) => {
         <>
           <Tabs.Screen
             name="Posts"
-            component={PostsScreen}
+            children={(props) => <PostsScreen avatar={avatar}{...props} />}
             options={{
               title: "Публикации",
               headerStyle: {
@@ -147,12 +145,12 @@ export const Home = ({ navigation, route }) => {
               ),
             }}
           />
-          <Tabs.Screen name="Profile" children={(props) => <ProfileScreen pictures={pictures} {...props} />} options={{headerShown: false}} />
+          <Tabs.Screen name="Profile" children={(props) => <ProfileScreen pictures={pictures} changeAvatar={setAvatar} {...props} />} options={{headerShown: false}} />
         </>
       )}
       {tabsOrder === 2 && (
         <>
-          <Tabs.Screen name="Posts" component={PostsScreen} options={{
+          <Tabs.Screen name="Posts" children={(props) => <PostsScreen avatar={avatar}{...props} />} options={{
               title: "Публикации",
               headerStyle: {
                 borderBottomColor: "#E5E5E5",
@@ -177,7 +175,7 @@ export const Home = ({ navigation, route }) => {
             }} />
           <Tabs.Screen
             name="Profile"
-            children={(props) => <ProfileScreen pictures={pictures} {...props} />}
+            children={(props) => <ProfileScreen pictures={pictures} changeAvatar={setAvatar} {...props} />}
             options={{
               tabBarItemStyle: {
                 backgroundColor: "#FF6C00",

@@ -1,4 +1,7 @@
 import { useState, useRef, useEffect } from "react";
+
+import * as ImagePicker from "expo-image-picker";
+
 import {
   StyleSheet,
   View,
@@ -50,7 +53,7 @@ export const ProfileScreen = (props) => {
  
   const pickImage = async () => {
     if (newImage) {
-      return setImage(null);
+      return setNewImage(null);
     }
 
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -61,6 +64,7 @@ export const ProfileScreen = (props) => {
     });
 
     if (!result.canceled) {
+        props.changeAvatar(result.assets[0].uri);
       setNewImage(result.assets[0].uri);
     }
   };

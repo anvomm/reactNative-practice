@@ -13,25 +13,31 @@ import Message from "../../assets/images/svg/message.svg";
 import MessageOrange from "../../assets/images/svg/messageOrange.svg";
 import Location from "../../assets/images/svg/location.svg";
 import ThumbsUp from "../../assets/images/svg/thumbsUp.svg";
+import { useNavigation } from "@react-navigation/native";
 
-export const PostsScreen = ({ navigation, route }) => {
-  const { login, email, image, picture } = route.params;
-
-  console.log(route.params)
+export const PostsScreen = (props) => {
+  const { login, email, image, picture } = props.route.params;
 
   const [userEmail] = useState(email);
   const [username] = useState(login);
-  const [avatar] = useState(image);
+  const [avatar, setAvatar] = useState(image);
   const [pictures, setPictures] = useState([]);
 
   const flatListRef = useRef(null);
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    if (props.avatar) {
+      setAvatar(props.avatar);
+    }
+  }, [props.avatar]);
 
   useEffect(() => {
     navigation.addListener("focus", () => {
       scrollToTop();
     });
 
-    if ("picture" in route.params) {
+    if ("picture" in props.route.params) {
       setPictures([{ ...picture, id: pictures.length }, ...pictures]);
     }
   }, [picture]);
@@ -39,6 +45,11 @@ export const PostsScreen = ({ navigation, route }) => {
   const scrollToTop = () => {
     flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
   };
+
+  /* const updatePicture = (picture) => {
+    const idx = pictures.findIndex(el => el.id === picture.id);
+    pictures[idx] = {...picture};
+  } */
 
   return (
     <View style={styles.container}>
@@ -73,21 +84,25 @@ export const PostsScreen = ({ navigation, route }) => {
             <View style={styles.postBottomWrap}>
               <View style={styles.postBottomLikeslWrap}>
                 <View style={styles.postBottomSmallWrap}>
-                  <Pressable onPress={() => navigation.navigate("Comments", {picture: item.image})}>
-                    {item?.comments?.length > 0 ? (
-                      <MessageOrange />
-                    ) : (
-                      <Message />
-                    )}
+                  <Pressable
+                    onPress={() =>
+                      navigation.navigate("Comments", {
+                        picture: item.image,
+                        avatar: avatar,
+                        login: username,
+                      })
+                    }
+                  >
+                    {item?.commentsCount > 0 ? <MessageOrange /> : <Message />}
                   </Pressable>
                   <Text
                     style={
-                      item?.comments?.length > 0
+                      item?.commentsCount > 0
                         ? postCommentsCountActive
                         : postCommentsCountInactive
                     }
                   >
-                    {item?.comments?.length ?? 0}
+                    {item?.commentsCount ?? 0}
                   </Text>
                 </View>
                 {item?.likesCount > 0 && (
