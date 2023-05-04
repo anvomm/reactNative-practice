@@ -68,7 +68,7 @@ export const CommentsScreen = (props) => {
         >
           <View style={styles.innerContainer}>
             <Image style={styles.postImage} source={{ uri: picture }} />
-            <FlatList
+            {commentsArr.length > 0 && <FlatList
               style={{ flex: 1 }}
               ref={flatlistRef}
               onContentSizeChange={() => flatlistRef.current.scrollToEnd({})}
@@ -113,7 +113,7 @@ export const CommentsScreen = (props) => {
                 </View>
               )}
               keyExtractor={(item) => item.id}
-            />
+            />}
             <TextInput
               style={styles.input}
               value={userComment}
