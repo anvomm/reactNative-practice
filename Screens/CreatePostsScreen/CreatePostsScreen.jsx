@@ -1,10 +1,11 @@
 import { useState } from "react";
 
+import { posts } from "../../mock_db/posts";
+
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
 
 import {
-  StyleSheet,
   View,
   Image,
   Text,
@@ -22,7 +23,18 @@ import Trash from "../../assets/images/svg/trash.svg";
 import Camera from "../../assets/images/svg/camera.svg";
 import CameraWhite from "../../assets/images/svg/cameraWhite.svg";
 
-export const CreatePostsScreen = ({ addPicture, adjustTabsOrder }) => {
+import {
+  styles,
+  locationInputStyle,
+  titleInputStyle,
+  buttonActiveStyle,
+  buttonActiveTextStyle,
+  buttonInactiveStyle,
+  buttonInactiveTextStyle,
+  addImageButtonOnImageStyle,
+} from "./CreatePostsScreenStyles";
+
+export const CreatePostsScreen = ({ owner, adjustTabsOrder }) => {
   const [image, setImage] = useState(null);
   const [imageTitle, setImageTitle] = useState("");
   const [location, setLocation] = useState("");
@@ -52,9 +64,20 @@ export const CreatePostsScreen = ({ addPicture, adjustTabsOrder }) => {
     if (!allTheDataInserted) {
       return Alert.alert("Необходимо заполнить все поля!");
     }
-    addPicture({ image, imageTitle, location, commentsCount: 0 });
+    const newPicture = {
+      id: Date.now(),
+      owner,
+      image,
+      title: imageTitle,
+      location,
+      comments: [],
+      likes: 0,
+    };
     adjustTabsOrder(1);
-    navigation.navigate("Posts", { picture: { image, imageTitle, location, commentsCount: 0, comments: [] } });
+    navigation.navigate("Posts", {
+      picture: { image, imageTitle, location, commentsCount: 0, comments: [] },
+    });
+    posts.unshift(newPicture);
     onDelete();
   };
 
@@ -137,124 +160,3 @@ export const CreatePostsScreen = ({ addPicture, adjustTabsOrder }) => {
     </TouchableWithoutFeedback>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#fff",
-    width: "100%",
-    height: "100%",
-    paddingHorizontal: 16,
-    paddingVertical: 32,
-    justifyContent: "space-between",
-  },
-  image: {
-    marginBottom: 8,
-    width: "100%",
-    height: 240,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#E8E8E8",
-  },
-  text: {
-    fontFamily: "Roboto-Regular",
-    fontSize: 16,
-    lineHeight: 18.75,
-    color: "#BDBDBD",
-  },
-  input: {
-    marginTop: 22,
-    paddingVertical: 15,
-    borderBottomColor: "#E8E8E8",
-    borderBottomWidth: 1,
-    fontFamily: "Roboto-Regular",
-    fontSize: 16,
-    lineHeight: 18.75,
-    color: "#212121",
-  },
-  padding: {
-    paddingLeft: 26,
-  },
-  boldText: {
-    fontFamily: "Roboto-Bold",
-  },
-  icon: {
-    position: "absolute",
-    bottom: 17,
-  },
-  button: {
-    width: "100%",
-    padding: 16,
-    marginTop: 32,
-    borderRadius: 100,
-  },
-  buttonInactive: {
-    backgroundColor: "#F6F6F6",
-  },
-  buttonActive: {
-    backgroundColor: "#FF6C00",
-  },
-  buttonText: {
-    fontFamily: "Roboto-Regular",
-    fontSize: 16,
-    lineHeight: 18.75,
-    textAlign: "center",
-  },
-  buttonActiveText: {
-    color: "#fff",
-  },
-  buttonInactiveText: {
-    color: "#BDBDBD",
-  },
-  deleteButton: {
-    alignSelf: "center",
-    width: 70,
-    height: 40,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F6F6F6",
-    borderRadius: 20,
-  },
-  addImageButton: {
-    position: "absolute",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 10,
-    width: 60,
-    height: 60,
-    backgroundColor: "#fff",
-    borderRadius: 50,
-  },
-  addImageButtonWithOpacity: {
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-  },
-  imageWrap: {
-    position: "relative",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
-
-const locationInputStyle = StyleSheet.compose(styles.input, styles.padding);
-const titleInputStyle = StyleSheet.compose(styles.input, styles.boldText);
-const buttonInactiveTextStyle = StyleSheet.compose(
-  styles.buttonText,
-  styles.buttonInactiveText
-);
-const buttonActiveTextStyle = StyleSheet.compose(
-  styles.buttonText,
-  styles.buttonActiveText
-);
-const addImageButtonOnImageStyle = StyleSheet.compose(
-  styles.addImageButton,
-  styles.addImageButtonWithOpacity
-);
-const buttonInactiveStyle = StyleSheet.compose(
-  styles.button,
-  styles.buttonInactive
-);
-const buttonActiveStyle = StyleSheet.compose(
-  styles.button,
-  styles.buttonActive
-);

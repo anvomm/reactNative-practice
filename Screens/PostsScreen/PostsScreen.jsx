@@ -1,55 +1,68 @@
 import { useState, useEffect, useRef } from "react";
 
+import { posts } from "../../mock_db/posts";
+
+import { useNavigation } from "@react-navigation/native";
+import { useIsFocused } from "@react-navigation/native";
+
 import {
   Image,
-  StyleSheet,
   View,
   Text,
   FlatList,
   Pressable,
+  TouchableOpacity,
 } from "react-native";
 
 import Message from "../../assets/images/svg/message.svg";
 import MessageOrange from "../../assets/images/svg/messageOrange.svg";
 import Location from "../../assets/images/svg/location.svg";
 import ThumbsUp from "../../assets/images/svg/thumbsUp.svg";
-import { useNavigation } from "@react-navigation/native";
+import ThumbsUpGrey from "../../assets/images/svg/thumbsUpGrey.svg";
+
+import styles from "./PostsScreenStyles";
+import {
+  postCommentsCountActive,
+  postCommentsCountInactive,
+} from "./PostsScreenStyles";
 
 export const PostsScreen = (props) => {
-  const { login, email, image, picture } = props.route.params;
+  const { login, email, image } = props.route.params;
 
   const [userEmail] = useState(email);
   const [username] = useState(login);
   const [avatar, setAvatar] = useState(image);
-  const [pictures, setPictures] = useState([]);
+  const [pictures, setPictures] = useState(posts || []);
+  const [needToUpdate, setNeedToUpdate] = useState(false);
+  const [pressedStates, setPressedStates] = useState(
+    new Array(pictures.length).fill(false)
+  );
 
   const flatListRef = useRef(null);
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     if (props.avatar) {
       setAvatar(props.avatar);
     }
-  }, [props.avatar]);
-
-  useEffect(() => {
-    navigation.addListener("focus", () => {
+    if (isFocused) {
+      setPictures(posts);
+      setPressedStates([false, ...pressedStates]);
       scrollToTop();
-    });
-
-    if ("picture" in props.route.params) {
-      setPictures([{ ...picture, id: pictures.length }, ...pictures]);
     }
-  }, [picture]);
+  }, [props.avatar, isFocused]);
 
   const scrollToTop = () => {
     flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
   };
-
-  /* const updatePicture = (picture) => {
-    const idx = pictures.findIndex(el => el.id === picture.id);
-    pictures[idx] = {...picture};
-  } */
+  const handlePress = (index) => {
+    if (!pressedStates[index]) {
+      const updatedPressedStates = [...pressedStates];
+      updatedPressedStates[index] = true;
+      setPressedStates(updatedPressedStates);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -70,153 +83,116 @@ export const PostsScreen = (props) => {
       <FlatList
         ref={flatListRef}
         style={{ flex: 1 }}
+        keyboardShouldPersistTaps="always"
         data={pictures}
         ListHeaderComponent={() => <View style={{ height: 0 }} />}
         ListEmptyComponent={
           <Text style={styles.loginText}>
-            Пока тут пусто, самое время добавить своё первое фото!
+            Пока тут пусто, самое время найти друзей и добавить своё первое
+            фото!
           </Text>
         }
-        renderItem={({ item }) => (
-          <View style={styles.postWrap}>
-            <Image style={styles.postImage} source={{ uri: item?.image }} />
-            <Text style={styles.postTitle}>{item?.imageTitle}</Text>
-            <View style={styles.postBottomWrap}>
-              <View style={styles.postBottomLikeslWrap}>
-                <View style={styles.postBottomSmallWrap}>
-                  <Pressable
-                    onPress={() =>
-                      navigation.navigate("Comments", {
-                        picture: item.image,
-                        avatar: avatar,
-                        login: username,
-                      })
-                    }
-                  >
-                    {item?.commentsCount > 0 ? <MessageOrange /> : <Message />}
-                  </Pressable>
-                  <Text
-                    style={
-                      item?.commentsCount > 0
-                        ? postCommentsCountActive
-                        : postCommentsCountInactive
-                    }
-                  >
-                    {item?.commentsCount ?? 0}
-                  </Text>
-                </View>
-                {item?.likesCount > 0 && (
+        renderItem={({ item, index }) => {
+          return (
+            <View style={styles.postWrap}>
+              <Image style={styles.postImage} source={{ uri: item?.image }} />
+              <Text style={styles.postTitle}>{item?.imageTitle}</Text>
+              <View style={styles.postBottomWrap}>
+                <View style={styles.postBottomLikeslWrap}>
                   <View style={styles.postBottomSmallWrap}>
-                    <ThumbsUp />
-                    <Text style={postCommentsCountActive}>
-                      item?.likesCount
+                    <TouchableOpacity
+                      onPress={() => {
+                        navigation.navigate("Comments", {
+                          picture: item.image,
+                          avatar: avatar,
+                          login: username,
+                        });
+                      }}
+                    >
+                      {item?.comments.length > 0 ? (
+                        <MessageOrange />
+                      ) : (
+                        <Message />
+                      )}
+                    </TouchableOpacity>
+                    <Text
+                      style={
+                        item?.comments.length > 0
+                          ? postCommentsCountActive
+                          : postCommentsCountInactive
+                      }
+                    >
+                      {item?.comments.length ?? 0}
                     </Text>
                   </View>
-                )}
-              </View>
+                  {item.likes > 0 ? (
+                    pressedStates[index] ? (
+                      <View style={styles.postBottomSmallWrap}>
+                        <ThumbsUp />
+                        <Text style={postCommentsCountActive}>
+                          {item.likes}
+                        </Text>
+                      </View>
+                    ) : (
+                      <TouchableOpacity
+                        onPress={() => {
+                          handlePress(index);
+                          const idx = posts.findIndex(
+                            (post) => post.image === item.image
+                          );
+                          posts[idx].likes += 1;
+                          setNeedToUpdate(!needToUpdate);
+                        }}
+                      >
+                        <View style={styles.postBottomSmallWrap}>
+                          <ThumbsUp />
+                          <Text style={postCommentsCountActive}>
+                            {item.likes}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    )
+                  ) : pressedStates[index] ? (
+                    <View style={styles.postBottomSmallWrap}>
+                      <ThumbsUpGrey />
+                      <Text style={postCommentsCountInactive}>
+                        {item.likes}
+                      </Text>
+                    </View>
+                  ) : (
+                    <TouchableOpacity
+                      onPress={() => {
+                        handlePress(index);
+                        const idx = posts.findIndex(
+                          (post) => post.image === item.image
+                        );
+                        posts[idx].likes += 1;
+                        setNeedToUpdate(!needToUpdate);
+                      }}
+                    >
+                      <View style={styles.postBottomSmallWrap}>
+                        <ThumbsUpGrey />
+                        <Text style={postCommentsCountInactive}>
+                          {item.likes}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  )}
+                </View>
 
-              <Pressable
-                style={styles.postBottomSmallWrap}
-                onPress={() => navigation.navigate("Map")}
-              >
-                <Location />
-                <Text style={styles.postLocation}>{item?.location}</Text>
-              </Pressable>
+                <Pressable
+                  style={styles.postBottomSmallWrap}
+                  onPress={() => navigation.navigate("Map")}
+                >
+                  <Location />
+                  <Text style={styles.postLocation}>{item?.location}</Text>
+                </Pressable>
+              </View>
             </View>
-          </View>
-        )}
+          );
+        }}
         keyExtractor={(item) => item?.id}
       />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#fff",
-    width: "100%",
-    height: "100%",
-    paddingHorizontal: 16,
-    paddingTop: 32,
-  },
-  image: {
-    width: 60,
-    height: 60,
-    borderRadius: 16,
-  },
-  contactsWrap: {
-    marginBottom: 32,
-    flexDirection: "row",
-    gap: 8,
-    alignItems: "center",
-  },
-  loginText: {
-    fontFamily: "Roboto-700",
-    fontWeight: 700,
-    fontSize: 13,
-    lineHeight: 16,
-    color: "#212121",
-  },
-  emailText: {
-    color: "rgba(33, 33, 33, 0.8)",
-  },
-  postImage: {
-    width: "100%",
-    height: 240,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  postTitle: {
-    marginBottom: 11,
-    fontFamily: "Roboto-Bold",
-    fontSize: 16,
-    lineHeight: 18.75,
-    color: "#212121",
-  },
-  postCommentsCount: {
-    fontFamily: "Roboto-Regular",
-    fontSize: 16,
-    lineHeight: 18.75,
-  },
-  grey: {
-    color: "#BDBDBD",
-  },
-  black: {
-    color: "#212121",
-  },
-  postLocation: {
-    fontFamily: "Roboto-Regular",
-    fontSize: 16,
-    lineHeight: 18.75,
-    color: "#212121",
-    textDecorationLine: "underline",
-  },
-  postBottomWrap: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  postBottomSmallWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  postWrap: {
-    marginBottom: 34,
-  },
-  postBottomLikeslWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 27,
-  },
-});
-
-export const postCommentsCountInactive = StyleSheet.compose(
-  styles.postCommentsCount,
-  styles.grey
-);
-export const postCommentsCountActive = StyleSheet.compose(
-  styles.postCommentsCount,
-  styles.black
-);
-
-export default styles;

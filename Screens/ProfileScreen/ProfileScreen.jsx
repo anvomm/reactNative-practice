@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 
+import { posts } from "../../mock_db/posts";
+
 import * as ImagePicker from "expo-image-picker";
 
 import {
-  StyleSheet,
   View,
   ImageBackground,
   Image,
@@ -20,21 +21,24 @@ import Message from "../../assets/images/svg/message.svg";
 import MessageOrange from "../../assets/images/svg/messageOrange.svg";
 import Location from "../../assets/images/svg/location.svg";
 import ThumbsUp from "../../assets/images/svg/thumbsUp.svg";
+import ThumbsUpGrey from "../../assets/images/svg/thumbsUpGrey.svg";
 
 import { confirmationAlert } from "../../components/feedback/ConfirmationAlert";
 
-import postsStyles from "../PostsScreen/PostsScreen";
+import { styles } from "./ProfileScreenStyles";
+import postsStyles from "../PostsScreen/PostsScreenStyles";
 import {
   postCommentsCountActive,
   postCommentsCountInactive,
-} from "../PostsScreen/PostsScreen";
+} from "../PostsScreen/PostsScreenStyles";
 
 export const ProfileScreen = (props) => {
-  const { login, image } = props.route.params;
+  const { email, login, image } = props.route.params;
 
   const [username] = useState(login ?? "Username");
   const [newImage, setNewImage] = useState(image ?? null);
-  const [pictures] = useState(props.pictures ?? []);
+
+  const pictures = posts.filter(post => post.owner === email)
 
   const ref = useRef(null);
   const navigation = useNavigation();
@@ -129,11 +133,18 @@ export const ProfileScreen = (props) => {
                           {item?.comments?.length ?? 0}
                         </Text>
                       </View>
-                      {item?.likesCount > 0 && (
+                      {item?.likes > 0 ? (
                         <View style={postsStyles.postBottomSmallWrap}>
                           <ThumbsUp />
                           <Text style={postCommentsCountActive}>
-                            item?.likesCount
+                            {item?.likes}
+                          </Text>
+                        </View>
+                      ) : (
+                        <View style={postsStyles.postBottomSmallWrap}>
+                          <ThumbsUpGrey />
+                          <Text style={postCommentsCountInactive}>
+                            {item?.likes}
                           </Text>
                         </View>
                       )}
@@ -159,53 +170,3 @@ export const ProfileScreen = (props) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  image: {
-    flex: 1,
-    paddingTop: 147,
-  },
-  whiteBox: {
-    paddingTop: 24,
-    paddingHorizontal: 16,
-    minHeight: 549,
-    width: "100%",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderTopRightRadius: 25,
-    borderTopLeftRadius: 25,
-  },
-  avatarImage: {
-    width: 120,
-    height: 120,
-    position: "absolute",
-    top: -60,
-    borderRadius: 16,
-  },
-  addButton: {
-    position: "absolute",
-    top: 20,
-    right: 108,
-  },
-  addButtonIcon: {
-    width: 25,
-    backgroundColor: "#fff",
-    borderRadius: 50,
-  },
-  nameText: {
-    fontFamily: "Roboto-Bold",
-    fontSize: 30,
-    lineHeight: 35,
-    color: "#212121",
-    marginBottom: 33,
-  },
-  logOutButton: {
-    alignSelf: "flex-end",
-    marginBottom: 48,
-  },
-  list: {
-    width: "100%",
-  },
-});

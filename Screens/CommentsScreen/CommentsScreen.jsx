@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+import { posts } from "../../mock_db/posts";
 
 import {
-  StyleSheet,
   View,
   Image,
   Text,
@@ -17,13 +18,30 @@ import ArrowUp from "../../assets/images/svg/arrowUp.svg";
 
 import { adjustTime } from "../../helpers/timeAdjustment";
 
+import {
+  commentTime,
+  emptyAvatar,
+  friendDateWrap,
+  commentTextWrap,
+  friendCommentTextWrap,
+} from "./CommentsScreenStyles";
+import styles from "./CommentsScreenStyles";
+
 export const CommentsScreen = (props) => {
   const { picture, avatar, login } = props.route.params;
 
   const [commentsArr, setCommentsArr] = useState(picture.comments ?? []);
-  const [userAvatar, setUserAvatar] = useState(avatar);
-  const [username, setUsername] = useState(login);
+  const [userAvatar] = useState(avatar ?? "");
+  const [username] = useState(login);
   const [userComment, setUserComment] = useState("");
+
+  const flatlistRef = useRef(null);
+
+  useEffect(() => {
+    const pictureToShow = posts.find((post) => post.image === picture);
+    setCommentsArr(pictureToShow.comments);
+    console.log(picture);
+  }, []);
 
   const sendComment = () => {
     const date = Date.now();
@@ -31,15 +49,16 @@ export const CommentsScreen = (props) => {
     if (userComment === "") return;
     const commentToAdd = {
       id: Date.now(),
-      user: { userAvatar, username },
+      userAvatar,
+      user: login,
       comment: userComment,
       createdAt: adjustTime(date),
     };
     setCommentsArr([...commentsArr, commentToAdd]);
-    const pictureWithUpdatedComments = {...picture, commentsCount: picture.commentsCount + 1, comments: commentsArr};
+
+    const postIdx = posts.findIndex((post) => post.image === picture);
+    posts[postIdx].comments.push(commentToAdd);
     setUserComment("");
-    /* props.updatePicture(pictureWithUpdatedComments);
-    setUserComment(""); */
   };
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -51,18 +70,44 @@ export const CommentsScreen = (props) => {
             <Image style={styles.postImage} source={{ uri: picture }} />
             <FlatList
               style={{ flex: 1 }}
+              ref={flatlistRef}
+              onContentSizeChange={() => flatlistRef.current.scrollToEnd({})}
               data={commentsArr}
               renderItem={({ item }) => (
-                <View style={styles.commentContainer}>
-                  {item.user.userAvatar ? <Image
-                    style={styles.avatar}
-                    source={{ uri: item.user.userAvatar }}
-                  />: <View style={emptyAvatar}/>}
-                  <View style={styles.commentTextWrap}>
+                <View
+                  style={
+                    item.user === username
+                      ? styles.commentContainer
+                      : styles.friendCommentsContainer
+                  }
+                >
+                  {item.userAvatar ? (
+                    <Image
+                      style={styles.avatar}
+                      source={{ uri: item.userAvatar }}
+                    />
+                  ) : (
+                    <View style={emptyAvatar} />
+                  )}
+                  <View
+                    style={
+                      item.user === username
+                        ? commentTextWrap
+                        : friendCommentTextWrap
+                    }
+                  >
                     <Text style={styles.commentText}>{item.comment}</Text>
-                    <View style={styles.dateWrap}>
-                    <Text style={styles.commentDate}>{item.createdAt.split(" ").slice(0,3).join(" ")}</Text>
-                    <Text style={commentTime}>{item.createdAt.split(" ").slice(-2).join(":")}</Text>
+                    <View
+                      style={
+                        item.user === login ? styles.dateWrap : friendDateWrap
+                      }
+                    >
+                      <Text style={styles.commentDate}>
+                        {item.createdAt.split(" ").slice(0, 3).join(" ")}
+                      </Text>
+                      <Text style={commentTime}>
+                        {item.createdAt.split(" ").slice(-2).join(":")}
+                      </Text>
                     </View>
                   </View>
                 </View>
@@ -90,88 +135,3 @@ export const CommentsScreen = (props) => {
     </TouchableWithoutFeedback>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  innerContainer: {
-    backgroundColor: "#fff",
-    width: "100%",
-    height: "100%",
-    paddingHorizontal: 16,
-    paddingVertical: 32,
-    justifyContent: "space-between",
-  },
-  postImage: {
-    width: "100%",
-    height: 240,
-    borderRadius: 8,
-    marginBottom: 32,
-  },
-  input: {
-    padding: 15,
-    borderColor: "#E8E8E8",
-    borderWidth: 1,
-    borderRadius: 100,
-    fontFamily: "Roboto-Regular",
-    fontSize: 16,
-    lineHeight: 18.75,
-    color: "#212121",
-    backgroundColor: "#F6F6F6",
-  },
-  button: {
-    width: 34,
-    height: 34,
-    position: "absolute",
-    right: 25,
-    bottom: 45,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#FF6C00",
-    borderRadius: 50,
-  },
-  avatar: {
-    width: 28,
-    height: 28,
-    borderRadius: 50,
-  },
-  commentText: {
-    marginBottom: 8,
-    flex: 1,
-    flexWrap: "wrap",
-    maxWidth: "100%",
-    fontFamily: "Roboto-Regular",
-    fontSize: 13,
-    lineHeight: 18,
-    color: "#212121",
-  },
-  commentTextWrap: {
-    marginBottom: 24,
-    padding: 16,
-    backgroundColor: "rgba(0, 0, 0, 0.03)",
-    width: "85%",
-    borderBottomLeftRadius: 6,
-    borderBottomRightRadius: 6,
-    borderTopLeftRadius: 6,
-  },
-  commentContainer: {
-    flexDirection: "row-reverse",
-    gap: 16,
-  },
-  commentDate: {
-    fontFamily: "Roboto-Regular",
-    fontSize: 10,
-    lineHeight: 11,
-    color: "#BDBDBD",
-  },
-  dateWrap: {
-    flexDirection: "row",
-    gap: 3,
-  }
-});
-
-const commentTime = StyleSheet.compose(styles.commentDate, {borderLeftColor: "#BDBDBD", borderLeftWidth: 1, paddingLeft: 3});
-
-const emptyAvatar = StyleSheet.compose(styles.avatar, {backgroundColor: "#F6F6F6"})

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { TouchableWithoutFeedback, Button } from "react-native";
@@ -23,17 +23,12 @@ const Tabs = createBottomTabNavigator();
 export const Home = ({ navigation, route }) => {
   const [tabsOrder, setTabsOrder] = useState(1);
   const {
-    params: { login, email, image, picture },
+    params: { login, email, image },
   } = route.params;
 
   const [userEmail] = useState(email);
   const [username] = useState(login);
   const [avatar, setAvatar] = useState(image);
-  const [pictures, setPictures] = useState([]);
-
-  const addPicture = (picture) => {
-    pictures.unshift(picture)
-  }
 
   return (
     <Tabs.Navigator
@@ -110,12 +105,13 @@ export const Home = ({ navigation, route }) => {
           />
           <Tabs.Screen
             name="CreatePost"
-            children={() => <CreatePostsScreen addPicture={addPicture} adjustTabsOrder={setTabsOrder}/>}
+            children={() => <CreatePostsScreen owner={userEmail} adjustTabsOrder={setTabsOrder}/>}
             options={{
               tabBarStyle: { display: "none" },
               tabBarItemStyle: {
                 backgroundColor: "#FF6C00",
                 height: 40,
+                maxWidth: 70,
                 alignSelf: "center",
                 borderRadius: 20,
               },
@@ -145,7 +141,7 @@ export const Home = ({ navigation, route }) => {
               ),
             }}
           />
-          <Tabs.Screen name="Profile" children={(props) => <ProfileScreen pictures={pictures} changeAvatar={setAvatar} {...props} />} options={{headerShown: false}} />
+          <Tabs.Screen name="Profile" children={(props) => <ProfileScreen changeAvatar={setAvatar} {...props} />} options={{headerShown: false}} />
         </>
       )}
       {tabsOrder === 2 && (
@@ -175,11 +171,12 @@ export const Home = ({ navigation, route }) => {
             }} />
           <Tabs.Screen
             name="Profile"
-            children={(props) => <ProfileScreen pictures={pictures} changeAvatar={setAvatar} {...props} />}
+            children={(props) => <ProfileScreen changeAvatar={setAvatar} {...props} />}
             options={{
               tabBarItemStyle: {
                 backgroundColor: "#FF6C00",
                 height: 40,
+                maxWidth: 70,
                 alignSelf: "center",
                 borderRadius: 20,
               },
@@ -188,7 +185,7 @@ export const Home = ({ navigation, route }) => {
           />
           <Tabs.Screen
             name="CreatePost"
-            children={() => <CreatePostsScreen addPicture={addPicture} adjustTabsOrder={setTabsOrder}/>}
+            children={() => <CreatePostsScreen owner={userEmail} adjustTabsOrder={setTabsOrder}/>}
             options={{
               tabBarStyle: { display: "none" },
               title: "Создать публикацию",
