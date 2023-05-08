@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { posts } from "../../mock_db/posts";
 
-import * as ImagePicker from "expo-image-picker";
+import { Camera } from "expo-camera";
+import * as MediaLibrary from "expo-media-library";
 import { useNavigation } from "@react-navigation/native";
+import { useIsFocused } from "@react-navigation/native";
 
 import {
   View,
@@ -20,7 +22,7 @@ import {
 
 import Location from "../../assets/images/svg/location.svg";
 import Trash from "../../assets/images/svg/trash.svg";
-import Camera from "../../assets/images/svg/camera.svg";
+import CameraIcon from "../../assets/images/svg/camera.svg";
 import CameraWhite from "../../assets/images/svg/cameraWhite.svg";
 
 import {
@@ -39,24 +41,27 @@ export const CreatePostsScreen = ({ owner, adjustTabsOrder }) => {
   const [imageTitle, setImageTitle] = useState("");
   const [location, setLocation] = useState("");
 
+  const [hasPermission, setHasPermission] = useState(null);
+  const [cameraRef, setCameraRef] = useState(null);
+  const [type, setType] = useState(Camera.Constants.Type.back);
+
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
 
-  const pickImage = async () => {
-    if (image) {
-      return setImage(null);
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestPermissionsAsync();
+      await MediaLibrary.requestPermissionsAsync();
+
+      setHasPermission(status === "granted");
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (!isFocused) {
+      setImage(null);
     }
-
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-    }
-  };
+  }, [isFocused]);
 
   const allTheDataInserted = image && location && imageTitle;
 
@@ -87,6 +92,16 @@ export const CreatePostsScreen = ({ owner, adjustTabsOrder }) => {
     setImageTitle("");
   };
 
+  const takePicture = async () => {
+    if (hasPermission === false) {
+      return Alert.alert("Пожалуйста разрешите камере доступ к приложению");
+    }
+    if (cameraRef) {
+      const data = await cameraRef.takePictureAsync(null);
+      setImage(data.uri);
+    }
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
@@ -95,18 +110,21 @@ export const CreatePostsScreen = ({ owner, adjustTabsOrder }) => {
             <TouchableOpacity
               activeOpacity={0.5}
               style={image ? addImageButtonOnImageStyle : styles.addImageButton}
-              onPress={pickImage}
+              onPress={takePicture}
             >
-              {image ? <CameraWhite /> : <Camera />}
+              {image ? <CameraWhite /> : <CameraIcon />}
             </TouchableOpacity>
-            <Image
-              style={styles.image}
-              source={
-                image
-                  ? { uri: image }
-                  : require("../../assets/images/emptyPostImage.png")
-              }
-            />
+            {!image && isFocused ? (
+              <Camera
+                style={styles.image}
+                type={type}
+                ref={(ref) => {
+                  setCameraRef(ref);
+                }}
+              />
+            ) : (
+              <Image style={styles.image} source={{ uri: image }} />
+            )}
           </View>
           <Text style={styles.text}>
             {image ? "Редактировать фото" : "Загрузите фото"}
