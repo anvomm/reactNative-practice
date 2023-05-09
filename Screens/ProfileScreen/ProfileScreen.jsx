@@ -38,23 +38,23 @@ export const ProfileScreen = (props) => {
   const [username] = useState(login ?? "Username");
   const [newImage, setNewImage] = useState(image ?? null);
 
-  const pictures = posts.filter(post => post.owner === email)
+  const pictures = posts.filter((post) => post.owner === email);
 
   const ref = useRef(null);
   const navigation = useNavigation();
 
   useEffect(() => {
     navigation.addListener("focus", () => {
-        scrollTop();
-      });
-  }, [])
+      scrollTop();
+    });
+  }, []);
 
   const scrollTop = () => {
     if (ref.current) {
-        ref.current.scrollTo({ x: 0, y: 0, animated: true })
+      ref.current.scrollTo({ x: 0, y: 0, animated: true });
     }
-  }
- 
+  };
+
   const pickImage = async () => {
     if (newImage) {
       return setNewImage(null);
@@ -68,7 +68,7 @@ export const ProfileScreen = (props) => {
     });
 
     if (!result.canceled) {
-        props.changeAvatar(result.assets[0].uri);
+      props.changeAvatar(result.assets[0].uri);
       setNewImage(result.assets[0].uri);
     }
   };
@@ -149,12 +149,20 @@ export const ProfileScreen = (props) => {
                         </View>
                       )}
                     </View>
-                    <View style={postsStyles.postBottomSmallWrap}>
+                    <Pressable
+                      style={postsStyles.postBottomSmallWrap}
+                      onPress={() =>
+                        navigation.navigate("Map", {
+                          latitude: item.coords.lat,
+                          longitude: item.coords.long,
+                        })
+                      }
+                    >
                       <Location />
                       <Text style={postsStyles.postLocation}>
                         {item?.location}
                       </Text>
-                    </View>
+                    </Pressable>
                   </View>
                 </View>
               ))
@@ -169,4 +177,3 @@ export const ProfileScreen = (props) => {
     </ScrollView>
   );
 };
-

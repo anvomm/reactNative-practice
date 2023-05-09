@@ -4,8 +4,9 @@ import { posts } from "../../mock_db/posts";
 
 import { Camera } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
-import { useNavigation } from "@react-navigation/native";
-import { useIsFocused } from "@react-navigation/native";
+import * as Location from "expo-location";
+
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 
 import {
   View,
@@ -20,7 +21,7 @@ import {
   Alert,
 } from "react-native";
 
-import Location from "../../assets/images/svg/location.svg";
+import LocationIcon from "../../assets/images/svg/location.svg";
 import Trash from "../../assets/images/svg/trash.svg";
 import CameraIcon from "../../assets/images/svg/camera.svg";
 import CameraWhite from "../../assets/images/svg/cameraWhite.svg";
@@ -43,7 +44,7 @@ export const CreatePostsScreen = ({ owner, adjustTabsOrder }) => {
 
   const [hasPermission, setHasPermission] = useState(null);
   const [cameraRef, setCameraRef] = useState(null);
-  const [type, setType] = useState(Camera.Constants.Type.back);
+  const [type] = useState(Camera.Constants.Type.back);
 
   const navigation = useNavigation();
   const isFocused = useIsFocused();
@@ -52,6 +53,11 @@ export const CreatePostsScreen = ({ owner, adjustTabsOrder }) => {
     (async () => {
       const { status } = await Camera.requestPermissionsAsync();
       await MediaLibrary.requestPermissionsAsync();
+
+      let response = await Location.requestPermissionsAsync();
+      if (response.status !== "granted") {
+        console.log("Permission to access location was denied");
+      }
 
       setHasPermission(status === "granted");
     })();
@@ -65,10 +71,16 @@ export const CreatePostsScreen = ({ owner, adjustTabsOrder }) => {
 
   const allTheDataInserted = image && location && imageTitle;
 
-  const onSave = () => {
+  const onSave = async () => {
     if (!allTheDataInserted) {
       return Alert.alert("Необходимо заполнить все поля!");
     }
+    let pictureLocation = await Location.getCurrentPositionAsync({});
+      const coords = {
+        lat: pictureLocation.coords.latitude,
+        long: pictureLocation.coords.longitude,
+      };
+
     const newPicture = {
       id: Date.now(),
       owner,
@@ -77,6 +89,7 @@ export const CreatePostsScreen = ({ owner, adjustTabsOrder }) => {
       location,
       comments: [],
       likes: 0,
+      coords,
     };
     adjustTabsOrder(1);
     navigation.navigate("Posts", {
@@ -143,7 +156,7 @@ export const CreatePostsScreen = ({ owner, adjustTabsOrder }) => {
               onChangeText={(text) => setImageTitle(text)}
             />
             <View>
-              <Location style={styles.icon} />
+              <LocationIcon style={styles.icon} />
               <TextInput
                 value={location}
                 style={locationInputStyle}

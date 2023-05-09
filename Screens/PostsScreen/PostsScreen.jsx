@@ -182,7 +182,12 @@ export const PostsScreen = (props) => {
 
                 <Pressable
                   style={styles.postBottomSmallWrap}
-                  onPress={() => navigation.navigate("Map")}
+                  onPress={() =>
+                    navigation.navigate("Map", {
+                      latitude: item.coords.lat,
+                      longitude: item.coords.long,
+                    })
+                  }
                 >
                   <Location />
                   <Text style={styles.postLocation}>{item?.location}</Text>
