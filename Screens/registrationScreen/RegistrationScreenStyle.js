@@ -93,6 +93,10 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 5,
   },
+  spinnerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  }
 });
 
 export const inputStyle = StyleSheet.compose(styles.input, styles.margin);

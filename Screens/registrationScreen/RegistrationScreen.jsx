@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import * as ImagePicker from "expo-image-picker";
 
@@ -14,7 +14,14 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Alert,
+  ActivityIndicator,
 } from "react-native";
+
+import { auth } from "../../firebase/config";
+import { onAuthStateChanged } from "firebase/auth";
+
+import { registerUser } from "../../redux/auth/authOperations";
+import { useDispatch, useSelector } from "react-redux";
 
 import {
   styles,
@@ -22,6 +29,7 @@ import {
   onFocusInputStyle,
   onFocusPasswordInputStyle,
 } from "./RegistrationScreenStyle";
+import { useIsFocused } from "@react-navigation/native";
 
 export const RegistrationScreen = ({ navigation }) => {
   const [login, setLogin] = useState("");
@@ -31,28 +39,49 @@ export const RegistrationScreen = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [hidePassword, setHidePassword] = useState(true);
   const [focusPassword, setFocusPassword] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
 
   const [image, setImage] = useState(null);
+
+  const dispatch = useDispatch();
+  const isFocused = useIsFocused();
+  const error = useSelector((state) => state.auth.error);
+  const isLoading = useSelector((state) => state.auth.isLoading);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      setIsCheckingAuth(true);
+      if (user) {
+        navigation.navigate("Home", {
+          screen: "Posts",
+        });
+      }
+    });
+  }, [isFocused]);
+
+  useEffect(() => {
+    if (error && error.includes("email-already-in-use")) {
+      Alert.alert("Пользователь с данной почтой уже существует");
+    }
+    if (error && error.includes("weak-password")) {
+      Alert.alert("Пароль должен содержать минимум 6 символов");
+    }
+    if (!error && !isLoading) {
+      setLogin("");
+      setEmail("");
+      setPassword("");
+      navigation.navigate("Home", {
+        screen: "Posts",
+      });
+    }
+  }, [error, isLoading]);
 
   const onRegister = () => {
     if (!login || !email || !password) {
       return Alert.alert("Необходимо заполнить все поля!");
     }
-
-    console.log("userdata: ", {
-      login,
-      email,
-      password,
-    });
-
-    navigation.navigate("Home", {
-      screen: "Posts",
-      params: { login, email, image },
-    });
-
-    setLogin("");
-    setEmail("");
-    setPassword("");
+    const userData = { login, email, password, image };
+    dispatch(registerUser(userData));
   };
 
   const pickImage = async () => {
@@ -76,7 +105,11 @@ export const RegistrationScreen = ({ navigation }) => {
     setHidePassword(!hidePassword);
   };
 
-  return (
+  return isCheckingAuth || isLoading ? (
+    <View style={styles.spinnerContainer}>
+      <ActivityIndicator size="large" color="#FF6C00" />
+    </View>
+  ) : (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
         <ImageBackground
@@ -150,6 +183,7 @@ export const RegistrationScreen = ({ navigation }) => {
                 onBlur={() => setFocusPassword(false)}
                 placeholder="Пароль"
                 placeholderTextColor="#BDBDBD"
+                value={password}
                 onChangeText={(text) => setPassword(text)}
               />
               <TouchableOpacity

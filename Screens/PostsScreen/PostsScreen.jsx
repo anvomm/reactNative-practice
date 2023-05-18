@@ -14,6 +14,11 @@ import {
   TouchableOpacity,
 } from "react-native";
 
+import { auth } from "../../firebase/config";
+import { onAuthStateChanged } from "firebase/auth";
+
+import { useSelector } from "react-redux";
+
 import Message from "../../assets/images/svg/message.svg";
 import MessageOrange from "../../assets/images/svg/messageOrange.svg";
 import Location from "../../assets/images/svg/location.svg";
@@ -26,12 +31,11 @@ import {
   postCommentsCountInactive,
 } from "./PostsScreenStyles";
 
-export const PostsScreen = (props) => {
-  const { login, email, image } = props.route.params;
-
-  const [userEmail] = useState(email);
-  const [username] = useState(login);
-  const [avatar, setAvatar] = useState(image);
+export const PostsScreen = () => {
+  
+  const [userEmail, setUserEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [avatar, setAvatar] = useState("");
   const [pictures, setPictures] = useState(posts || []);
   const [needToUpdate, setNeedToUpdate] = useState(false);
   const [pressedStates, setPressedStates] = useState(
@@ -41,17 +45,27 @@ export const PostsScreen = (props) => {
   const flatListRef = useRef(null);
   const navigation = useNavigation();
   const isFocused = useIsFocused();
+  const isLoading = useSelector((state) => state.auth.isLoading);
 
   useEffect(() => {
-    if (props.avatar) {
-      setAvatar(props.avatar);
-    }
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserEmail(user.email);
+        setUsername(user.displayName);
+        setAvatar(user.photoURL);
+      }
+      else {
+        navigation.goBack();
+        return;
+      }
+    });
+
     if (isFocused) {
       setPictures(posts);
       setPressedStates([false, ...pressedStates]);
       scrollToTop();
     }
-  }, [props.avatar, isFocused]);
+  }, [isFocused]);
 
   const scrollToTop = () => {
     flatListRef.current.scrollToOffset({ animated: true, offset: 0 });

@@ -12,9 +12,16 @@ import {
   Text,
   Pressable,
   ScrollView,
+  Alert,
 } from "react-native";
 
+import { auth } from "../../firebase/config";
+import { onAuthStateChanged } from "firebase/auth";
+
 import { useNavigation } from "@react-navigation/native";
+
+import { useDispatch } from "react-redux";
+import {  updateAvatar,logoutUser } from "../../redux/auth/authOperations";
 
 import LogOut from "../../assets/images/svg/logOut.svg";
 import Message from "../../assets/images/svg/message.svg";
@@ -23,29 +30,40 @@ import Location from "../../assets/images/svg/location.svg";
 import ThumbsUp from "../../assets/images/svg/thumbsUp.svg";
 import ThumbsUpGrey from "../../assets/images/svg/thumbsUpGrey.svg";
 
-import { confirmationAlert } from "../../components/feedback/ConfirmationAlert";
-
 import { styles } from "./ProfileScreenStyles";
-import postsStyles from "../PostsScreen/PostsScreenStyles";
+import postsStyles from "../postsScreen/PostsScreenStyles";
 import {
   postCommentsCountActive,
   postCommentsCountInactive,
-} from "../PostsScreen/PostsScreenStyles";
+} from "../postsScreen/PostsScreenStyles";
 
 export const ProfileScreen = (props) => {
-  const { email, login, image } = props.route.params;
 
-  const [username] = useState(login ?? "Username");
-  const [newImage, setNewImage] = useState(image ?? null);
+  const [username, setUsername] = useState("Username");
+  const [avatar, setAvatar] = useState(null);
+  const [userEmail, setUserEmail] = useState("");
 
-  const pictures = posts.filter((post) => post.owner === email);
+  const pictures = posts.filter((post) => post.owner === userEmail);
 
   const ref = useRef(null);
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     navigation.addListener("focus", () => {
       scrollTop();
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserEmail(user.email);
+        setUsername(user.displayName);
+        setAvatar(user.photoURL);
+        return;
+      } else {
+        navigation.goBack();
+        return;
+      }
     });
   }, []);
 
@@ -55,9 +73,25 @@ export const ProfileScreen = (props) => {
     }
   };
 
+  const confirmLogout = () =>
+    Alert.alert("Вы уверены, что хотите выйти?", "", [
+      {
+        text: "Отменить",
+        onPress: () => console.log("Cancel Pressed"),
+        style: "cancel",
+      },
+      {
+        text: "Выйти",
+        onPress: () => {
+          dispatch(logoutUser());
+          navigation.navigate("Login");
+        },
+      },
+    ]);
+
   const pickImage = async () => {
-    if (newImage) {
-      return setNewImage(null);
+    if (avatar) {
+      return setAvatar(null);
     }
 
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -68,8 +102,8 @@ export const ProfileScreen = (props) => {
     });
 
     if (!result.canceled) {
-      props.changeAvatar(result.assets[0].uri);
-      setNewImage(result.assets[0].uri);
+      const photoURL = result.assets[0].uri;
+      dispatch(updateAvatar(photoURL));
     }
   };
 
@@ -80,14 +114,14 @@ export const ProfileScreen = (props) => {
         style={styles.image}
       >
         <View style={styles.whiteBox}>
-          <Pressable style={styles.logOutButton} onPress={confirmationAlert}>
+          <Pressable style={styles.logOutButton} onPress={confirmLogout}>
             <LogOut />
           </Pressable>
           <Image
             style={styles.avatarImage}
             source={
-              newImage
-                ? { uri: newImage }
+              avatar
+                ? { uri: avatar }
                 : require("../../assets/images/emptyAvatar.jpg")
             }
           />
@@ -99,7 +133,7 @@ export const ProfileScreen = (props) => {
             <Image
               style={styles.addButtonIcon}
               source={
-                newImage
+                avatar
                   ? require("../../assets/images/delete.png")
                   : require("../../assets/images/add.png")
               }

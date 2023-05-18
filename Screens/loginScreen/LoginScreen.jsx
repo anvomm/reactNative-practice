@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   ImageBackground,
@@ -10,8 +10,17 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
-  Alert
+  Alert,
+  ActivityIndicator,
 } from "react-native";
+
+import { useIsFocused } from "@react-navigation/native";
+
+import { auth } from "../../firebase/config";
+import { onAuthStateChanged } from "firebase/auth";
+
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser } from "../../redux/auth/authOperations";
 
 import { loginStyles } from "./LoginScreenStyle";
 import {
@@ -22,36 +31,65 @@ import {
 } from "../registrationScreen/RegistrationScreenStyle";
 
 export const LoginScreen = ({ navigation }) => {
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
   const [email, setEmail] = useState("");
   const [focusEmail, setFocusEmail] = useState(false);
   const [password, setPassword] = useState("");
   const [hidePassword, setHidePassword] = useState(true);
   const [focusPassword, setFocusPassword] = useState(false);
 
+  const isFocused = useIsFocused();
+  const dispatch = useDispatch();
+  const error = useSelector((state) => state.auth.error);
+  const isLoading = useSelector((state) => state.auth.isLoading);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      setIsCheckingAuth(true);
+      if (user) {
+        navigation.navigate("Home", {
+          screen: "Posts",
+        });
+      } else {
+        setIsCheckingAuth(false);
+      }
+    });
+  }, [isFocused]);
+
+  useEffect(() => {
+    if (error && error.includes("wrong-password")) {
+      Alert.alert("Проверьте правильность введённой почты и пароля");
+    }
+    if (!error && !isLoading) {
+      setEmail("");
+      setPassword("");
+      navigation.navigate("Home", {
+        screen: "Posts",
+      });
+    }
+  }, [error, isLoading]);
+
   const onLogin = () => {
     if (!email || !password) {
       return Alert.alert("Необходимо заполнить все поля!");
     }
 
-    console.log("userdata: ", {
+    const userData = {
       email,
       password,
-    });
-
-    navigation.navigate("Home", {
-      screen: "Posts",
-      params: { email },
-    });
-
-    setEmail("");
-    setPassword("");
+    };
+    dispatch(loginUser(userData));
   };
 
   const managePasswordVisibility = () => {
     setHidePassword(!hidePassword);
   };
 
-  return (
+  return isCheckingAuth || isLoading ? (
+    <View style={styles.spinnerContainer}>
+      <ActivityIndicator size="large" color="#FF6C00" />
+    </View>
+  ) : (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
         <ImageBackground
@@ -86,6 +124,7 @@ export const LoginScreen = ({ navigation }) => {
                 onBlur={() => setFocusPassword(false)}
                 placeholder="Пароль"
                 placeholderTextColor="#BDBDBD"
+                value={password}
                 onChangeText={(text) => setPassword(text)}
               />
               <TouchableOpacity
