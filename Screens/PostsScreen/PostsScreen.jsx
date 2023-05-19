@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 
-import { posts } from "../../mock_db/posts";
-
 import { useNavigation } from "@react-navigation/native";
 import { useIsFocused } from "@react-navigation/native";
 
@@ -12,12 +10,17 @@ import {
   FlatList,
   Pressable,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 
 import { auth } from "../../firebase/config";
 import { onAuthStateChanged } from "firebase/auth";
 
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  fetchAllPosts,
+  addLikeToPost,
+} from "../../redux/posts/postsOperations";
 
 import Message from "../../assets/images/svg/message.svg";
 import MessageOrange from "../../assets/images/svg/messageOrange.svg";
@@ -32,20 +35,18 @@ import {
 } from "./PostsScreenStyles";
 
 export const PostsScreen = () => {
-  
+  const posts = useSelector((state) => state.posts.posts);
   const [userEmail, setUserEmail] = useState("");
   const [username, setUsername] = useState("");
+  const [userId, setUserId] = useState("");
   const [avatar, setAvatar] = useState("");
-  const [pictures, setPictures] = useState(posts || []);
-  const [needToUpdate, setNeedToUpdate] = useState(false);
-  const [pressedStates, setPressedStates] = useState(
-    new Array(pictures.length).fill(false)
-  );
 
   const flatListRef = useRef(null);
   const navigation = useNavigation();
   const isFocused = useIsFocused();
+  const dispatch = useDispatch();
   const isLoading = useSelector((state) => state.auth.isLoading);
+  const isLoadingPosts = useSelector((state) => state.posts.isLoading);
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -53,16 +54,14 @@ export const PostsScreen = () => {
         setUserEmail(user.email);
         setUsername(user.displayName);
         setAvatar(user.photoURL);
-      }
-      else {
+        setUserId(user.uid);
+      } else {
         navigation.goBack();
-        return;
       }
     });
 
     if (isFocused) {
-      setPictures(posts);
-      setPressedStates([false, ...pressedStates]);
+      dispatch(fetchAllPosts());
       scrollToTop();
     }
   }, [isFocused]);
@@ -70,13 +69,8 @@ export const PostsScreen = () => {
   const scrollToTop = () => {
     flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
   };
-  const handlePress = (index) => {
-    if (!pressedStates[index]) {
-      const updatedPressedStates = [...pressedStates];
-      updatedPressedStates[index] = true;
-      setPressedStates(updatedPressedStates);
-    }
-  };
+
+  const sortedPosts = posts.slice().sort((a, b) => b.id - a.id);
 
   return (
     <View style={styles.container}>
@@ -94,124 +88,120 @@ export const PostsScreen = () => {
           <Text style={styles.emailText}>{userEmail}</Text>
         </View>
       </View>
-      <FlatList
-        ref={flatListRef}
-        style={{ flex: 1 }}
-        keyboardShouldPersistTaps="always"
-        data={pictures}
-        ListHeaderComponent={() => <View style={{ height: 0 }} />}
-        ListEmptyComponent={
-          <Text style={styles.loginText}>
-            Пока тут пусто, самое время найти друзей и добавить своё первое
-            фото!
-          </Text>
-        }
-        renderItem={({ item, index }) => {
-          return (
-            <View style={styles.postWrap}>
-              <Image style={styles.postImage} source={{ uri: item?.image }} />
-              <Text style={styles.postTitle}>{item?.imageTitle}</Text>
-              <View style={styles.postBottomWrap}>
-                <View style={styles.postBottomLikeslWrap}>
-                  <View style={styles.postBottomSmallWrap}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        navigation.navigate("Comments", {
-                          picture: item.image,
-                          avatar: avatar,
-                          login: username,
-                        });
-                      }}
-                    >
-                      {item?.comments.length > 0 ? (
-                        <MessageOrange />
+      {isLoadingPosts ? (
+        <ActivityIndicator size="large" color="#FF6C00" />
+      ) : (
+        <FlatList
+          ref={flatListRef}
+          style={{ flex: 1 }}
+          keyboardShouldPersistTaps="always"
+          data={sortedPosts}
+          ListHeaderComponent={() => <View style={{ height: 0 }} />}
+          ListEmptyComponent={
+            <Text style={styles.loginText}>
+              Пока тут пусто, самое время найти друзей и добавить своё первое
+              фото!
+            </Text>
+          }
+          renderItem={({ item }) => {
+            return (
+              <View style={styles.postWrap}>
+                <Image style={styles.postImage} source={{ uri: item?.image }} />
+                <Text style={styles.postTitle}>{item?.imageTitle}</Text>
+                <View style={styles.postBottomWrap}>
+                  <View style={styles.postBottomLikeslWrap}>
+                    <View style={styles.postBottomSmallWrap}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          navigation.navigate("Comments", {
+                            picture: item.image,
+                          });
+                        }}
+                      >
+                        {item?.comments.length > 0 ? (
+                          <MessageOrange />
+                        ) : (
+                          <Message />
+                        )}
+                      </TouchableOpacity>
+                      <Text
+                        style={
+                          item?.comments.length > 0
+                            ? postCommentsCountActive
+                            : postCommentsCountInactive
+                        }
+                      >
+                        {item?.comments.length ?? 0}
+                      </Text>
+                    </View>
+                    {item.likes.length > 0 ? (
+                      item.likes.includes(userId) ? (
+                        <View style={styles.postBottomSmallWrap}>
+                          <ThumbsUp />
+                          <Text style={postCommentsCountActive}>
+                            {item.likes.length}
+                          </Text>
+                        </View>
                       ) : (
-                        <Message />
-                      )}
-                    </TouchableOpacity>
-                    <Text
-                      style={
-                        item?.comments.length > 0
-                          ? postCommentsCountActive
-                          : postCommentsCountInactive
-                      }
-                    >
-                      {item?.comments.length ?? 0}
-                    </Text>
-                  </View>
-                  {item.likes > 0 ? (
-                    pressedStates[index] ? (
+                        <TouchableOpacity
+                          onPress={() => {
+                            dispatch(
+                              addLikeToPost({ user: userId, id: item.id })
+                            );
+                          }}
+                        >
+                          <View style={styles.postBottomSmallWrap}>
+                            <ThumbsUp />
+                            <Text style={postCommentsCountActive}>
+                              {item.likes.length}
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
+                      )
+                    ) : item.likes.includes(userId) ? (
                       <View style={styles.postBottomSmallWrap}>
-                        <ThumbsUp />
-                        <Text style={postCommentsCountActive}>
-                          {item.likes}
+                        <ThumbsUpGrey />
+                        <Text style={postCommentsCountInactive}>
+                          {item.likes.length}
                         </Text>
                       </View>
                     ) : (
                       <TouchableOpacity
                         onPress={() => {
-                          handlePress(index);
-                          const idx = posts.findIndex(
-                            (post) => post.image === item.image
+                          dispatch(
+                            addLikeToPost({ user: userId, id: item.id })
                           );
-                          posts[idx].likes += 1;
-                          setNeedToUpdate(!needToUpdate);
                         }}
                       >
                         <View style={styles.postBottomSmallWrap}>
-                          <ThumbsUp />
-                          <Text style={postCommentsCountActive}>
-                            {item.likes}
+                          <ThumbsUpGrey />
+                          <Text style={postCommentsCountInactive}>
+                            {item.likes.length}
                           </Text>
                         </View>
                       </TouchableOpacity>
-                    )
-                  ) : pressedStates[index] ? (
-                    <View style={styles.postBottomSmallWrap}>
-                      <ThumbsUpGrey />
-                      <Text style={postCommentsCountInactive}>
-                        {item.likes}
-                      </Text>
-                    </View>
-                  ) : (
-                    <TouchableOpacity
-                      onPress={() => {
-                        handlePress(index);
-                        const idx = posts.findIndex(
-                          (post) => post.image === item.image
-                        );
-                        posts[idx].likes += 1;
-                        setNeedToUpdate(!needToUpdate);
-                      }}
-                    >
-                      <View style={styles.postBottomSmallWrap}>
-                        <ThumbsUpGrey />
-                        <Text style={postCommentsCountInactive}>
-                          {item.likes}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  )}
-                </View>
+                    )}
+                  </View>
 
-                <Pressable
-                  style={styles.postBottomSmallWrap}
-                  onPress={() =>
-                    navigation.navigate("Map", {
-                      latitude: item.coords.lat,
-                      longitude: item.coords.long,
-                    })
-                  }
-                >
-                  <Location />
-                  <Text style={styles.postLocation}>{item?.location}</Text>
-                </Pressable>
+                  <Pressable
+                    style={styles.postBottomSmallWrap}
+                    onPress={() =>
+                      navigation.navigate("Map", {
+                        latitude: item.coords.lat,
+                        longitude: item.coords.long,
+                      })
+                    }
+                  >
+                    <Location />
+                    <Text style={styles.postLocation}>{item?.location}</Text>
+                  </Pressable>
+                </View>
               </View>
-            </View>
-          );
-        }}
-        keyExtractor={(item) => item?.id}
-      />
+            );
+          }}
+          keyExtractor={(item) => item?.id}
+        />
+      )}
     </View>
   );
 };

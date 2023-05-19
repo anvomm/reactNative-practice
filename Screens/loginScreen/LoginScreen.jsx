@@ -60,7 +60,7 @@ export const LoginScreen = ({ navigation }) => {
     if (error && error.includes("wrong-password")) {
       Alert.alert("Проверьте правильность введённой почты и пароля");
     }
-    if (!error && !isLoading) {
+    if (!error && !isLoading && email && password) {
       setEmail("");
       setPassword("");
       navigation.navigate("Home", {

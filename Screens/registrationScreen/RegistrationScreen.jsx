@@ -55,6 +55,8 @@ export const RegistrationScreen = ({ navigation }) => {
         navigation.navigate("Home", {
           screen: "Posts",
         });
+      } else {
+        setIsCheckingAuth(false);
       }
     });
   }, [isFocused]);
@@ -66,7 +68,7 @@ export const RegistrationScreen = ({ navigation }) => {
     if (error && error.includes("weak-password")) {
       Alert.alert("Пароль должен содержать минимум 6 символов");
     }
-    if (!error && !isLoading) {
+    if (!error && !isLoading && login && email && password) {
       setLogin("");
       setEmail("");
       setPassword("");

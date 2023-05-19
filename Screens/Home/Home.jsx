@@ -18,26 +18,16 @@ import { CreatePostsScreen } from "../createPostsScreen/CreatePostsScreen";
 import { PostsScreen } from "../postsScreen/PostsScreen";
 import { ProfileScreen } from "../profileScreen/ProfileScreen";
 
-
 const Tabs = createBottomTabNavigator();
 
-export const Home = ({ navigation, route }) => {
+export const Home = ({ navigation }) => {
   const [tabsOrder, setTabsOrder] = useState(1);
-  /* const {
-    params: { login, email, image },
-  } = route.params; */
-
-  /* const [userEmail] = useState(email);
-  const [username] = useState(login);
-  const [avatar, setAvatar] = useState(image); */
-
   const dispatch = useDispatch();
 
   const confirmLogout = () =>
     Alert.alert("Вы уверены, что хотите выйти?", "", [
       {
         text: "Отменить",
-        onPress: () => console.log("Cancel Pressed"),
         style: "cancel",
       },
       {
@@ -68,9 +58,7 @@ export const Home = ({ navigation, route }) => {
                 <TouchableWithoutFeedback
                   onPress={() => {
                     setTabsOrder(2);
-                    navigation.navigate(
-                      "Profile" /* , { login: username, email: userEmail, image: avatar } */
-                    );
+                    navigation.navigate("Profile");
                   }}
                 >
                   {tabsOrder === 2 ? <UserWhite /> : <User />}
@@ -81,9 +69,7 @@ export const Home = ({ navigation, route }) => {
                 <TouchableWithoutFeedback
                   onPress={() => {
                     setTabsOrder(1);
-                    navigation.navigate(
-                      "Posts" /* , { login: username, email: userEmail, image: avatar } */
-                    );
+                    navigation.navigate("Posts");
                   }}
                 >
                   <Grid />
@@ -101,9 +87,7 @@ export const Home = ({ navigation, route }) => {
         <>
           <Tabs.Screen
             name="Posts"
-            children={(props) => (
-              <PostsScreen /*  avatar={avatar} */ {...props} />
-            )}
+            component={PostsScreen}
             options={{
               title: "Публикации",
               headerStyle: {
@@ -119,10 +103,7 @@ export const Home = ({ navigation, route }) => {
                 fontSize: 17,
               },
               headerRight: () => (
-                <Pressable
-                  style={{ paddingRight: 20 }}
-                  onPress={confirmLogout}
-                >
+                <Pressable style={{ paddingRight: 20 }} onPress={confirmLogout}>
                   <LogOut />
                 </Pressable>
               ),
@@ -131,10 +112,7 @@ export const Home = ({ navigation, route }) => {
           <Tabs.Screen
             name="CreatePost"
             children={() => (
-              <CreatePostsScreen
-                owner={userEmail}
-                adjustTabsOrder={setTabsOrder}
-              />
+              <CreatePostsScreen adjustTabsOrder={setTabsOrder} />
             )}
             options={{
               tabBarStyle: { display: "none" },
@@ -162,11 +140,7 @@ export const Home = ({ navigation, route }) => {
               headerLeft: () => (
                 <Pressable
                   style={{ paddingLeft: 20 }}
-                  onPress={() =>
-                    navigation.navigate(
-                      "Posts" /* , { login: username, email: userEmail, image: avatar } */
-                    )
-                  }
+                  onPress={() => navigation.navigate("Posts")}
                 >
                   <Back />
                 </Pressable>
@@ -175,9 +149,7 @@ export const Home = ({ navigation, route }) => {
           />
           <Tabs.Screen
             name="Profile"
-            children={(props) => (
-              <ProfileScreen /* changeAvatar={setAvatar} */ {...props} />
-            )}
+            component={ProfileScreen}
             options={{ headerShown: false }}
           />
         </>
@@ -186,9 +158,7 @@ export const Home = ({ navigation, route }) => {
         <>
           <Tabs.Screen
             name="Posts"
-            children={(props) => (
-              <PostsScreen /* avatar={avatar} */ {...props} />
-            )}
+            component={PostsScreen}
             options={{
               title: "Публикации",
               headerStyle: {
@@ -204,10 +174,7 @@ export const Home = ({ navigation, route }) => {
                 fontSize: 17,
               },
               headerRight: () => (
-                <Pressable
-                  style={{ paddingRight: 20 }}
-                  onPress={confirmLogout}
-                >
+                <Pressable style={{ paddingRight: 20 }} onPress={confirmLogout}>
                   <LogOut />
                 </Pressable>
               ),
@@ -215,9 +182,7 @@ export const Home = ({ navigation, route }) => {
           />
           <Tabs.Screen
             name="Profile"
-            children={(props) => (
-              <ProfileScreen /* changeAvatar={setAvatar} */ {...props} />
-            )}
+            component={ProfileScreen}
             options={{
               tabBarItemStyle: {
                 backgroundColor: "#FF6C00",
@@ -232,10 +197,7 @@ export const Home = ({ navigation, route }) => {
           <Tabs.Screen
             name="CreatePost"
             children={() => (
-              <CreatePostsScreen
-                owner={userEmail}
-                adjustTabsOrder={setTabsOrder}
-              />
+              <CreatePostsScreen adjustTabsOrder={setTabsOrder} />
             )}
             options={{
               tabBarStyle: { display: "none" },
@@ -256,11 +218,7 @@ export const Home = ({ navigation, route }) => {
                 <Pressable
                   style={{ paddingLeft: 20 }}
                   onPress={() =>
-                    navigation.navigate("Profile", {
-                      login: username,
-                      email: userEmail,
-                      image: avatar,
-                    })
+                    navigation.navigate("Profile")
                   }
                 >
                   <Back />

@@ -1,7 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 
-import { posts } from "../../mock_db/posts";
-
 import * as ImagePicker from "expo-image-picker";
 
 import {
@@ -20,8 +18,8 @@ import { onAuthStateChanged } from "firebase/auth";
 
 import { useNavigation } from "@react-navigation/native";
 
-import { useDispatch } from "react-redux";
-import {  updateAvatar,logoutUser } from "../../redux/auth/authOperations";
+import { useDispatch, useSelector } from "react-redux";
+import { updateAvatar, logoutUser } from "../../redux/auth/authOperations";
 
 import LogOut from "../../assets/images/svg/logOut.svg";
 import Message from "../../assets/images/svg/message.svg";
@@ -37,13 +35,13 @@ import {
   postCommentsCountInactive,
 } from "../postsScreen/PostsScreenStyles";
 
-export const ProfileScreen = (props) => {
-
+export const ProfileScreen = () => {
   const [username, setUsername] = useState("Username");
   const [avatar, setAvatar] = useState(null);
   const [userEmail, setUserEmail] = useState("");
+  const [picturesOwner, setPicturesOwner] = useState("");
 
-  const pictures = posts.filter((post) => post.owner === userEmail);
+  const posts = useSelector((state) => state.posts.posts);
 
   const ref = useRef(null);
   const navigation = useNavigation();
@@ -59,13 +57,14 @@ export const ProfileScreen = (props) => {
         setUserEmail(user.email);
         setUsername(user.displayName);
         setAvatar(user.photoURL);
-        return;
+        setPicturesOwner(user.uid);
       } else {
         navigation.goBack();
-        return;
       }
     });
   }, []);
+
+  const pictures = posts.filter((post) => post.owner === picturesOwner);
 
   const scrollTop = () => {
     if (ref.current) {
@@ -77,7 +76,6 @@ export const ProfileScreen = (props) => {
     Alert.alert("Вы уверены, что хотите выйти?", "", [
       {
         text: "Отменить",
-        onPress: () => console.log("Cancel Pressed"),
         style: "cancel",
       },
       {
@@ -167,18 +165,18 @@ export const ProfileScreen = (props) => {
                           {item?.comments?.length ?? 0}
                         </Text>
                       </View>
-                      {item?.likes > 0 ? (
+                      {item?.likes.length > 0 ? (
                         <View style={postsStyles.postBottomSmallWrap}>
                           <ThumbsUp />
                           <Text style={postCommentsCountActive}>
-                            {item?.likes}
+                            {item?.likes.length}
                           </Text>
                         </View>
                       ) : (
                         <View style={postsStyles.postBottomSmallWrap}>
                           <ThumbsUpGrey />
                           <Text style={postCommentsCountInactive}>
-                            {item?.likes}
+                            {item?.likes.length}
                           </Text>
                         </View>
                       )}

@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 
-import { posts } from "../../mock_db/posts";
-
 import {
   View,
   Image,
@@ -13,6 +11,12 @@ import {
   TouchableOpacity,
   FlatList,
 } from "react-native";
+
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../firebase/config";
+
+import { useDispatch, useSelector } from "react-redux";
+import { addCommentToPost } from "../../redux/posts/postsOperations";
 
 import ArrowUp from "../../assets/images/svg/arrowUp.svg";
 
@@ -28,19 +32,29 @@ import {
 import styles from "./CommentsScreenStyles";
 
 export const CommentsScreen = (props) => {
-  const { picture, avatar, login } = props.route.params;
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      setUserAvatar(user.photoURL);
+      setUsername(user.displayName);
+      setUserId(user.uid);
+    }
+  });
 
-  const [commentsArr, setCommentsArr] = useState(picture.comments ?? []);
-  const [userAvatar] = useState(avatar ?? "");
-  const [username] = useState(login);
+  const posts = useSelector((state) => state.posts.posts);
+  const { picture } = props.route.params;
+
+  const [commentsArr, setCommentsArr] = useState(posts.comments ?? []);
+  const [userAvatar, setUserAvatar] = useState("");
+  const [username, setUsername] = useState("");
+  const [userId, setUserId] = useState("");
   const [userComment, setUserComment] = useState("");
 
   const flatlistRef = useRef(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const pictureToShow = posts.find((post) => post.image === picture);
     setCommentsArr(pictureToShow.comments);
-    console.log(picture);
   }, []);
 
   const sendComment = () => {
@@ -50,14 +64,15 @@ export const CommentsScreen = (props) => {
     const commentToAdd = {
       id: Date.now(),
       userAvatar,
-      user: login,
+      user: userId,
       comment: userComment,
       createdAt: adjustTime(date),
     };
     setCommentsArr([...commentsArr, commentToAdd]);
 
-    const postIdx = posts.findIndex((post) => post.image === picture);
-    posts[postIdx].comments.push(commentToAdd);
+    const id = posts.find((post) => post.image === picture).id;
+
+    dispatch(addCommentToPost({ comment: commentToAdd, id }));
     setUserComment("");
   };
   return (
@@ -68,52 +83,56 @@ export const CommentsScreen = (props) => {
         >
           <View style={styles.innerContainer}>
             <Image style={styles.postImage} source={{ uri: picture }} />
-            {commentsArr.length > 0 && <FlatList
-              style={{ flex: 1 }}
-              ref={flatlistRef}
-              onContentSizeChange={() => flatlistRef.current.scrollToEnd({})}
-              data={commentsArr}
-              renderItem={({ item }) => (
-                <View
-                  style={
-                    item.user === username
-                      ? styles.commentContainer
-                      : styles.friendCommentsContainer
-                  }
-                >
-                  {item.userAvatar ? (
-                    <Image
-                      style={styles.avatar}
-                      source={{ uri: item.userAvatar }}
-                    />
-                  ) : (
-                    <View style={emptyAvatar} />
-                  )}
+            {commentsArr.length > 0 && (
+              <FlatList
+                style={{ flex: 1 }}
+                ref={flatlistRef}
+                onContentSizeChange={() => flatlistRef.current.scrollToEnd({})}
+                data={commentsArr}
+                renderItem={({ item }) => (
                   <View
                     style={
                       item.user === username
-                        ? commentTextWrap
-                        : friendCommentTextWrap
+                        ? styles.commentContainer
+                        : styles.friendCommentsContainer
                     }
                   >
-                    <Text style={styles.commentText}>{item.comment}</Text>
+                    {item.userAvatar ? (
+                      <Image
+                        style={styles.avatar}
+                        source={{ uri: item.userAvatar }}
+                      />
+                    ) : (
+                      <View style={emptyAvatar} />
+                    )}
                     <View
                       style={
-                        item.user === login ? styles.dateWrap : friendDateWrap
+                        item.user === username
+                          ? commentTextWrap
+                          : friendCommentTextWrap
                       }
                     >
-                      <Text style={styles.commentDate}>
-                        {item.createdAt.split(" ").slice(0, 3).join(" ")}
-                      </Text>
-                      <Text style={commentTime}>
-                        {item.createdAt.split(" ").slice(-2).join(":")}
-                      </Text>
+                      <Text style={styles.commentText}>{item.comment}</Text>
+                      <View
+                        style={
+                          item.user === username
+                            ? styles.dateWrap
+                            : friendDateWrap
+                        }
+                      >
+                        <Text style={styles.commentDate}>
+                          {item.createdAt.split(" ").slice(0, 3).join(" ")}
+                        </Text>
+                        <Text style={commentTime}>
+                          {item.createdAt.split(" ").slice(-2).join(":")}
+                        </Text>
+                      </View>
                     </View>
                   </View>
-                </View>
-              )}
-              keyExtractor={(item) => item.id}
-            />}
+                )}
+                keyExtractor={(item) => item.id}
+              />
+            )}
             <TextInput
               style={styles.input}
               value={userComment}

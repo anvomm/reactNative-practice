@@ -39,7 +39,6 @@ export const loginUser = createAsyncThunk(
       const user = userCredential.user;
       return userData;
     } catch (error) {
-      console.log(error.message);
       return thunkAPI.rejectWithValue(error.message);
     }
   }

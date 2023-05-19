@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 
-import { posts } from "../../mock_db/posts";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../firebase/config";
+
+import { useDispatch } from "react-redux";
+import { createPost } from "../../redux/posts/postsOperations";
 
 import { Camera } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
@@ -37,7 +41,14 @@ import {
   addImageButtonOnImageStyle,
 } from "./CreatePostsScreenStyles";
 
-export const CreatePostsScreen = ({ owner, adjustTabsOrder }) => {
+export const CreatePostsScreen = ({ adjustTabsOrder }) => {
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      setOwner(user.uid);
+    }
+  });
+
+  const [owner, setOwner] = useState("");
   const [image, setImage] = useState(null);
   const [imageTitle, setImageTitle] = useState("");
   const [location, setLocation] = useState("");
@@ -48,6 +59,7 @@ export const CreatePostsScreen = ({ owner, adjustTabsOrder }) => {
 
   const navigation = useNavigation();
   const isFocused = useIsFocused();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     (async () => {
@@ -76,26 +88,24 @@ export const CreatePostsScreen = ({ owner, adjustTabsOrder }) => {
       return Alert.alert("Необходимо заполнить все поля!");
     }
     let pictureLocation = await Location.getCurrentPositionAsync({});
-      const coords = {
-        lat: pictureLocation.coords.latitude,
-        long: pictureLocation.coords.longitude,
-      };
+    const coords = {
+      lat: pictureLocation.coords.latitude,
+      long: pictureLocation.coords.longitude,
+    };
 
-    const newPicture = {
+    const post = {
       id: Date.now(),
       owner,
       image,
       title: imageTitle,
       location,
       comments: [],
-      likes: 0,
+      likes: [],
       coords,
     };
+    dispatch(createPost(post));
     adjustTabsOrder(1);
-    navigation.navigate("Posts", {
-      picture: { image, imageTitle, location, commentsCount: 0, comments: [] },
-    });
-    posts.unshift(newPicture);
+    navigation.navigate("Posts");
     onDelete();
   };
 
