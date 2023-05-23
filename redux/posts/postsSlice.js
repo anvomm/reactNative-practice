@@ -17,9 +17,6 @@ const postsSlice = createSlice({
   initialState,
   extraReducers: (builder) => {
     builder
-      .addCase(createPost.fulfilled, (state, { payload }) => {
-        state.posts.unshift(payload);
-      })
       .addCase(fetchAllPosts.fulfilled, (state, { payload }) => {
         state.posts = payload;
       })

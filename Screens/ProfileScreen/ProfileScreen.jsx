@@ -140,7 +140,7 @@ export const ProfileScreen = () => {
           <Text style={styles.nameText}>{username}</Text>
           <View style={styles.list}>
             {pictures.length > 0 ? (
-              pictures.map((item) => (
+              pictures.sort((a, b) => b.id - a.id).map((item) => (
                 <View key={item?.id} style={postsStyles.postWrap}>
                   <Image
                     style={postsStyles.postImage}

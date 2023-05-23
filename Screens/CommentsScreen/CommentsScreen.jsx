@@ -35,7 +35,6 @@ export const CommentsScreen = (props) => {
   onAuthStateChanged(auth, (user) => {
     if (user) {
       setUserAvatar(user.photoURL);
-      setUsername(user.displayName);
       setUserId(user.uid);
     }
   });
@@ -45,7 +44,7 @@ export const CommentsScreen = (props) => {
 
   const [commentsArr, setCommentsArr] = useState(posts.comments ?? []);
   const [userAvatar, setUserAvatar] = useState("");
-  const [username, setUsername] = useState("");
+  const [pictreOwner, setPictreOwner] = useState("");
   const [userId, setUserId] = useState("");
   const [userComment, setUserComment] = useState("");
 
@@ -54,6 +53,7 @@ export const CommentsScreen = (props) => {
 
   useEffect(() => {
     const pictureToShow = posts.find((post) => post.image === picture);
+    setPictreOwner(pictureToShow.owner);
     setCommentsArr(pictureToShow.comments);
   }, []);
 
@@ -92,7 +92,7 @@ export const CommentsScreen = (props) => {
                 renderItem={({ item }) => (
                   <View
                     style={
-                      item.user === username
+                      item.user === pictreOwner
                         ? styles.commentContainer
                         : styles.friendCommentsContainer
                     }
@@ -107,7 +107,7 @@ export const CommentsScreen = (props) => {
                     )}
                     <View
                       style={
-                        item.user === username
+                        item.user === pictreOwner
                           ? commentTextWrap
                           : friendCommentTextWrap
                       }
@@ -115,7 +115,7 @@ export const CommentsScreen = (props) => {
                       <Text style={styles.commentText}>{item.comment}</Text>
                       <View
                         style={
-                          item.user === username
+                          item.user === pictreOwner
                             ? styles.dateWrap
                             : friendDateWrap
                         }

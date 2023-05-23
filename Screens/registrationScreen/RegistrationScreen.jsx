@@ -68,6 +68,9 @@ export const RegistrationScreen = ({ navigation }) => {
     if (error && error.includes("weak-password")) {
       Alert.alert("Пароль должен содержать минимум 6 символов");
     }
+    if (error && error.includes("invalid-email")) {
+      Alert.alert("Проверьте правильность введённой почты");
+    }
     if (!error && !isLoading && login && email && password) {
       setLogin("");
       setEmail("");

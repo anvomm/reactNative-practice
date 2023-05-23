@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 import { useNavigation } from "@react-navigation/native";
 import { useIsFocused } from "@react-navigation/native";
@@ -41,7 +41,6 @@ export const PostsScreen = () => {
   const [userId, setUserId] = useState("");
   const [avatar, setAvatar] = useState("");
 
-  const flatListRef = useRef(null);
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   const dispatch = useDispatch();
@@ -62,15 +61,8 @@ export const PostsScreen = () => {
 
     if (isFocused) {
       dispatch(fetchAllPosts());
-      scrollToTop();
     }
   }, [isFocused]);
-
-  const scrollToTop = () => {
-    flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
-  };
-
-  const sortedPosts = posts.slice().sort((a, b) => b.id - a.id);
 
   return (
     <View style={styles.container}>
@@ -92,10 +84,9 @@ export const PostsScreen = () => {
         <ActivityIndicator size="large" color="#FF6C00" />
       ) : (
         <FlatList
-          ref={flatListRef}
           style={{ flex: 1 }}
           keyboardShouldPersistTaps="always"
-          data={sortedPosts}
+          data={posts.slice().sort((a, b) => b.id - a.id)}
           ListHeaderComponent={() => <View style={{ height: 0 }} />}
           ListEmptyComponent={
             <Text style={styles.loginText}>

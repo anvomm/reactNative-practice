@@ -9,7 +9,11 @@ import {
   query,
   where,
 } from "firebase/firestore";
+
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+
 import { db } from "../../firebase/config";
+import { storage } from "../../firebase/config";
 
 export const fetchAllPosts = createAsyncThunk(
   "posts/fetchAllPosts",
@@ -29,7 +33,38 @@ export const createPost = createAsyncThunk(
   async (post, thunkAPI) => {
     try {
       const newPost = await addDoc(collection(db, "posts"), { ...post });
-      return post;
+      await updateDoc(newPost, { uid: newPost.id });
+
+      const response = await fetch(post.image);
+
+      const blob = await response.blob();
+
+      const storageRef = ref(storage, "images/" + `${newPost.id}.jpg`);
+      const uploadTask = uploadBytesResumable(storageRef, blob, {
+        contentType: "image/jpeg",
+      });
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {},
+        (error) => {
+          switch (error.code) {
+            case "storage/unauthorized":
+              break;
+            case "storage/canceled":
+              break;
+            case "storage/unknown":
+              break;
+          }
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            updateDoc(newPost, { image: downloadURL });
+          });
+        }
+      );
+
+      return;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }

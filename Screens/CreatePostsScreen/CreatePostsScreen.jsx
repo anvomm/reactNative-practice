@@ -120,8 +120,8 @@ export const CreatePostsScreen = ({ adjustTabsOrder }) => {
       return Alert.alert("Пожалуйста разрешите камере доступ к приложению");
     }
     if (cameraRef) {
-      const data = await cameraRef.takePictureAsync(null);
-      setImage(data.uri);
+      const { uri } = await cameraRef.takePictureAsync(null);
+      setImage(uri);
     }
   };
 
