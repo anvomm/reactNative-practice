@@ -28,7 +28,7 @@ export const registerUser = createAsyncThunk(
 
       const blob = await response.blob();
 
-      const storageRef = ref(storage, "avatars/" + `${user.id}.jpg`);
+      const storageRef = ref(storage, "avatars/" + `${user.uid}.jpg`);
       const uploadTask = uploadBytesResumable(storageRef, blob, {
         contentType: "image/jpeg",
       });
@@ -82,6 +82,34 @@ export const updateAvatar = createAsyncThunk(
   async (photoURL, thunkAPI) => {
     try {
       await updateProfile(auth.currentUser, { photoURL });
+      const response = await fetch(photoURL);
+
+      const blob = await response.blob();
+
+      const storageRef = ref(storage, "avatars/" + `${auth.currentUser.uid}.jpg`);
+      const uploadTask = uploadBytesResumable(storageRef, blob, {
+        contentType: "image/jpeg",
+      });
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {},
+        (error) => {
+          switch (error.code) {
+            case "storage/unauthorized":
+              break;
+            case "storage/canceled":
+              break;
+            case "storage/unknown":
+              break;
+          }
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            updateProfile(auth.currentUser, { photoURL: downloadURL });
+          });
+        }
+      );
       return;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);

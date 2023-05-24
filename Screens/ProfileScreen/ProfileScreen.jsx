@@ -101,6 +101,7 @@ export const ProfileScreen = () => {
 
     if (!result.canceled) {
       const photoURL = result.assets[0].uri;
+      setAvatar(photoURL);
       dispatch(updateAvatar(photoURL));
     }
   };

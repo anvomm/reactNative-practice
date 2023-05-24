@@ -16,17 +16,32 @@ import { db } from "../../firebase/config";
 import { storage } from "../../firebase/config";
 
 export const fetchAllPosts = createAsyncThunk(
-  "posts/fetchAllPosts",
-  async (_, thunkAPI) => {
-    try {
-      const posts = await getDocs(collection(db, "posts"));
-      const allPosts = posts.docs.map((doc) => doc.data());
-      return allPosts;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+    "posts/fetchAllPosts",
+    async (_, thunkAPI) => {
+      try {
+        const posts = await getDocs(collection(db, "posts"));
+      const allPosts = posts.docs.map(async (doc) => {
+        const post = doc.data();
+        const updatedComments = await Promise.all(
+          post.comments.map(async (comment) => {
+            const imageRef = ref(storage, `avatars/${comment.user}.jpg`);
+            const downloadURL = await getDownloadURL(imageRef);
+            return { ...comment, userAvatar: downloadURL };
+          })
+        );
+        return { ...post, comments: updatedComments };
+      });
+
+      const updatedPosts = await Promise.all(allPosts);
+
+      return updatedPosts;
+
+      } catch (error) {
+        return thunkAPI.rejectWithValue(error.message);
+      }
     }
-  }
-);
+  );
+  
 
 export const createPost = createAsyncThunk(
   "posts/createPost",
